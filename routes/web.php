@@ -16,3 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::post('/recipe', [\App\Http\Controllers\RecipeController::class, 'store']);
+Route::get('/test-csrf-token', [\App\Http\Controllers\TestController::class, 'index']);
