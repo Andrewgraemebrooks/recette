@@ -36,6 +36,10 @@ class RecipeController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'required|unique:recipes',
+            'ingredients' => 'required'
+        ]);
         $recipe = new Recipe;
         $recipe->name = $request->name;
         $recipe->save();
@@ -93,12 +97,5 @@ class RecipeController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    private function mapIngredients($ingredients)
-    {
-        return collect($ingredients)->map(function ($i) {
-            return ['amount' => $i];
-        });
     }
 }
