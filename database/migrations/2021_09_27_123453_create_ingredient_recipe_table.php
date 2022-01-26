@@ -15,7 +15,7 @@ class CreateIngredientRecipeTable extends Migration
     {
         Schema::create('ingredient_recipe', function (Blueprint $table) {
             $table->foreignId('ingredient_id')->references('id')->on('ingredients');
-            $table->foreignId('recipe_id')->references('id')->on('recipes');
+            $table->foreignUuid('recipe_id')->references('id')->on('recipes');
             $table->integer('amount')->unsigned()->default(0);
         });
     }

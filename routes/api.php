@@ -17,3 +17,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Recipes
+Route::post('/recipe', [\App\Http\Controllers\RecipeController::class, 'store'])->name('recipe.store');
+
+// Categories
+Route::post('/category', [\App\Http\Controllers\CategoryController::class, 'store'])->name('category.store');
+
+// Testing
+Route::get('/test-csrf-token', [\App\Http\Controllers\TestController::class, 'index'])->name('csrf.index');
