@@ -2,11 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Models\Ingredient;
 use App\Models\Recipe;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-class RecipeTest extends TestCase
+class StoreRecipeTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -16,11 +17,35 @@ class RecipeTest extends TestCase
     {
         $data = $this->getRecipeData();
         $response = $this->postJson('/recipe', $data);
-        $response->assertStatus(200);
+        $response->assertCreated();
         $this->assertDatabaseCount('recipes', 1);
         $this->assertDatabaseCount('ingredients', 2);
         $this->assertDatabaseCount('ingredient_recipe', 2);
     }
+
+    /** @test */
+    public function the_correct_recipe_information_is_returned_on_successful_creation()
+    {
+        $data = $this->getRecipeData();
+        $response = $this->postJson('/recipe', $data);
+        $recipe = Recipe::first();
+        $response->assertJson([
+            'data' => [
+                'name' => $recipe->name,
+                'ingredients' => [
+                    [
+                        'name' => $recipe->ingredients[0]->name,
+                        'amount' => $recipe->ingredients[0]->pivot->amount
+                    ],
+                    [
+                        'name' => $recipe->ingredients[1]->name,
+                        'amount' => $recipe->ingredients[1]->pivot->amount
+                    ],
+                ]
+            ]
+        ]);
+    }
+
 
     /** @test */
     public function a_name_is_required_for_recipe_creation()
@@ -53,7 +78,7 @@ class RecipeTest extends TestCase
             'name' => 'some-recipe-name',
             'ingredients' => [
                 ['name' => 'some-ingredient', 'amount' => 1],
-                ['name' => 'some-other-ingredient', 'amount' => 1],
+                ['name' => 'some-other-ingredient', 'amount' => 4],
         ]], $merge);
     }
 }

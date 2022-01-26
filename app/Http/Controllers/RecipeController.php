@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\RecipeResource;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use Illuminate\Http\Request;
@@ -40,18 +41,18 @@ class RecipeController extends Controller
             'name' => 'required|unique:recipes',
             'ingredients' => 'required'
         ]);
-        $recipe = new Recipe;
+        $recipe = new Recipe();
         $recipe->name = $request->name;
         $recipe->save();
         $ingredients = $request->ingredients;
         foreach ($ingredients as $ingredient) {
             $name = $ingredient['name'];
             $amount = $ingredient['amount'];
-            $new_ingredient = new Ingredient;
+            $new_ingredient = new Ingredient();
             $new_ingredient->name = $name;
             $recipe->ingredients()->save($new_ingredient, ['amount' => $amount]);
         }
-        return response(['success' => true, 'data' => ['recipe' => $recipe, 'ingredients' => $recipe->ingredients()->get()]], 200);
+        return new RecipeResource($recipe);
     }
 
     /**
