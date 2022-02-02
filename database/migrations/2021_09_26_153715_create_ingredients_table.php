@@ -14,7 +14,7 @@ class CreateIngredientsTable extends Migration
     public function up()
     {
         Schema::create('ingredients', function (Blueprint $table) {
-            $table->id()->unsigned();
+            $table->uuid('id')->primary();
             $table->timestamps();
             $table->string('name');
         });

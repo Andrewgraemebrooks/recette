@@ -33,6 +33,19 @@ class StoreCategoriesTest extends TestCase
         $this->assertTrue(Str::isUuid($category->id));
     }
 
+    /** @test */
+    public function a_category_name_must_be_unique()
+    {
+        $data = $this->getCategoryData([
+            'name' => 'same-category-name'
+        ]);
+
+        $this->postJson(route('category.store'), $data);
+        $response = $this->postJson(route('category.store'), $data);
+
+        $response->assertJsonValidationErrors('name');
+    }
+
     protected function getCategoryData($merge = []): array
     {
         return array_merge([

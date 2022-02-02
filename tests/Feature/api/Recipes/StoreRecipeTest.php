@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 use Illuminate\Support\Str;
 
@@ -24,18 +25,24 @@ class StoreRecipeTest extends TestCase
         $this->assertDatabaseCount('ingredients', 2);
         $this->assertDatabaseCount('ingredient_recipe', 2);
         $recipe = Recipe::first();
+        $ingredients = collect($recipe->ingredients)->map(function ($ingredient) {
+            return [
+                'name' => $ingredient->name,
+                'amount' => $ingredient->pivot->amount
+            ];
+        })->toArray();
         $this->assertEquals($recipe->name, $data['name']);
-        $this->assertEquals($recipe->ingredients[0]->name, $data['ingredients'][0]['name']);
-        $this->assertEquals($recipe->ingredients[0]->pivot->amount, $data['ingredients'][0]['amount']);
-        $this->assertEquals($recipe->ingredients[1]->name, $data['ingredients'][1]['name']);
-        $this->assertEquals($recipe->ingredients[1]->pivot->amount, $data['ingredients'][1]['amount']);
+        $this->assertArrayHasKey('name', $ingredients[0]);
+        $this->assertEqualsCanonicalizing($data['ingredients'], $ingredients);
     }
 
     /** @test */
     public function the_correct_recipe_information_is_returned_on_successful_creation()
     {
         $data = $this->getRecipeData();
+
         $response = $this->postJson(route('recipe.store'), $data);
+
         $recipe = Recipe::first();
         $response->assertJson([
             'data' => [
@@ -58,8 +65,10 @@ class StoreRecipeTest extends TestCase
     /** @test */
     public function a_name_is_required_for_recipe_creation()
     {
-        $data = $this->getRecipeData(['name' => '']);
+        $data = $this->getRecipeData(['name' => null]);
+
         $response = $this->postJson(route('recipe.store'), $data);
+
         $response->assertJsonValidationErrors('name');
     }
 
@@ -67,7 +76,9 @@ class StoreRecipeTest extends TestCase
     public function a_list_of_ingredients_is_required_for_recipe_creation()
     {
         $data = $this->getRecipeData(['ingredients' => []]);
+
         $response = $this->postJson(route('recipe.store'), $data);
+
         $response->assertJsonValidationErrors('ingredients');
     }
 
@@ -75,7 +86,9 @@ class StoreRecipeTest extends TestCase
     public function a_recipe_name_must_be_unique()
     {
         $data = $this->getRecipeData();
+
         $this->postJson(route('recipe.store'), $data);
+
         $response = $this->postJson(route('recipe.store'), $data);
         $response->assertJsonValidationErrors('name');
     }
@@ -84,11 +97,38 @@ class StoreRecipeTest extends TestCase
     public function the_recipe_id_is_a_uuid()
     {
         $data = $this->getRecipeData();
+
         $this->postJson(route('recipe.store'), $data);
+
         $recipe = Recipe::first();
         $this->assertTrue(Str::isUuid($recipe->id));
     }
 
+    /** @test */
+    public function the_ingredients_must_be_an_array()
+    {
+        $ingredients = json_encode([
+            ['name' => 'some-ingredient', 'amount' => 1],
+            ['name' => 'some-other-ingredient', 'amount' => 4],
+        ]);
+        $data = $this->getRecipeData([
+            'ingredients' => $ingredients
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertJsonValidationErrors('ingredients');
+    }
+
+    /** @test */
+    public function a_name_must_be_a_string_for_recipe_creation()
+    {
+        $data = $this->getRecipeData(['name' => 99999999]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertJsonValidationErrors('name');
+    }
 
     protected function getRecipeData($merge = []): array
     {

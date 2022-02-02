@@ -2,6 +2,10 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\RecipeController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\IngredientController;
+use App\Http\Controllers\TestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,10 +23,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // Recipes
-Route::post('/recipe', [\App\Http\Controllers\RecipeController::class, 'store'])->name('recipe.store');
+Route::post('/recipe', [RecipeController::class, 'store'])->name('recipe.store');
 
 // Categories
-Route::post('/category', [\App\Http\Controllers\CategoryController::class, 'store'])->name('category.store');
+Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
+
+// Ingredients
+Route::post('/ingredient', [IngredientController::class, 'store'])->name('ingredient.store');
 
 // Testing
-Route::get('/test-csrf-token', [\App\Http\Controllers\TestController::class, 'index'])->name('csrf.index');
+Route::get('/test-csrf-token', [TestController::class, 'index'])->name('csrf.index');
