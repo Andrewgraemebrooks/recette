@@ -24,6 +24,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // Recipes
 Route::post('/recipe', [RecipeController::class, 'store'])->name('recipe.store');
+Route::get('/recipe', [RecipeController::class, 'index'])->name('recipe.index');
 
 // Categories
 Route::post('/category', [CategoryController::class, 'store'])->name('category.store');

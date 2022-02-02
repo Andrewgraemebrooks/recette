@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\RecipeRequest;
+use App\Http\Requests\StoreRecipeRequest;
 use App\Http\Resources\RecipeResource;
 use App\Models\Ingredient;
 use App\Models\Recipe;
@@ -17,7 +17,8 @@ class RecipeController extends Controller
      */
     public function index()
     {
-        //
+        $recipes = Recipe::all();
+        return RecipeResource::collection($recipes);
     }
 
     /**
@@ -36,7 +37,7 @@ class RecipeController extends Controller
      * @param  \App\Http\Requests\RecipeRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(RecipeRequest $request)
+    public function store(StoreRecipeRequest $request)
     {
         $recipe = new Recipe();
         $recipe->name = $request->name;

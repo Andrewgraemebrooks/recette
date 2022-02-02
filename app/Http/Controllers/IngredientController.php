@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\IngredientRequest;
+use App\Http\Requests\StoreIngredientRequest;
 use App\Http\Resources\IngredientResource;
 use App\Models\Ingredient;
 use Illuminate\Http\Request;
@@ -35,7 +35,7 @@ class IngredientController extends Controller
      * @param  \App\Http\Requests\IngredientRequest;  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(IngredientRequest $request)
+    public function store(StoreIngredientRequest $request)
     {
         $ingredient = new Ingredient();
         $ingredient->name = $request->name;

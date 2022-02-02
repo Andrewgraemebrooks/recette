@@ -44,19 +44,17 @@ class StoreRecipeTest extends TestCase
         $response = $this->postJson(route('recipe.store'), $data);
 
         $recipe = Recipe::first();
-        $response->assertJson([
-            'data' => [
-                'name' => $recipe->name,
-                'ingredients' => [
-                    [
-                        'name' => $recipe->ingredients[0]->name,
-                        'amount' => $recipe->ingredients[0]->pivot->amount
-                    ],
-                    [
-                        'name' => $recipe->ingredients[1]->name,
-                        'amount' => $recipe->ingredients[1]->pivot->amount
-                    ],
-                ]
+        $response->assertJsonFragment([
+            'name' => $recipe->name,
+            'ingredients' => [
+                [
+                    'name' => $recipe->ingredients[0]->name,
+                    'amount' => $recipe->ingredients[0]->pivot->amount
+                ],
+                [
+                    'name' => $recipe->ingredients[1]->name,
+                    'amount' => $recipe->ingredients[1]->pivot->amount
+                ],
             ]
         ]);
     }
