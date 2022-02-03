@@ -84,7 +84,10 @@ class RecipeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $recipe = Recipe::where('id', $id)->first();
+        $recipe->name = $request->name;
+        $recipe->save();
+        return new RecipeResource($recipe);
     }
 
     /**
