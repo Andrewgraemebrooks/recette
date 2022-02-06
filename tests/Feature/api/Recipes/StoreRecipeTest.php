@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Illuminate\Support\Str;
 
@@ -127,6 +129,33 @@ class StoreRecipeTest extends TestCase
 
         $response->assertJsonValidationErrors('name');
     }
+
+    /** @test */
+    public function an_array_of_images_can_be_stored_with_a_recipe()
+    {
+        Storage::fake('local');
+        $data = $this->getRecipeData(['images' => [
+            UploadedFile::fake()->image('imageOne.jpg'),
+            UploadedFile::fake()->image('imageTwo.jpg')
+        ]]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertCreated();
+        Storage::disk('local')->assertExists(['imageOne.jpg','imageTwo.jpg']);
+    }
+
+    /** @test */
+    public function can_store_a_recipe_without_images()
+    {
+        $data = $this->getRecipeData(['images' => null]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertCreated();
+    }
+
+
 
     protected function getRecipeData($merge = []): array
     {

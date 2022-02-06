@@ -7,6 +7,8 @@ use App\Http\Resources\RecipeResource;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class RecipeController extends Controller
 {
@@ -42,13 +44,17 @@ class RecipeController extends Controller
         $recipe = new Recipe();
         $recipe->name = $request->name;
         $recipe->save();
-        $ingredients = $request->ingredients;
-        foreach ($ingredients as $ingredient) {
+        foreach ($request->ingredients as $ingredient) {
             $name = $ingredient['name'];
             $amount = $ingredient['amount'];
             $new_ingredient = new Ingredient();
             $new_ingredient->name = $name;
             $recipe->ingredients()->save($new_ingredient, ['amount' => $amount]);
+        }
+        if ($request->images) {
+            foreach ($request->images as $image) {
+                Storage::put($image->name, $image);
+            }
         }
         return new RecipeResource($recipe);
     }
