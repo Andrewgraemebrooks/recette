@@ -8,7 +8,6 @@ use App\Models\Ingredient;
 use App\Models\Recipe;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class RecipeController extends Controller
 {
@@ -24,19 +23,9 @@ class RecipeController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\RecipeRequest  $request
+     * @param  \App\Http\Requests\StoreRecipeRequest  $request
      * @return \Illuminate\Http\Response
      */
     public function store(StoreRecipeRequest $request)
@@ -63,34 +52,22 @@ class RecipeController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \App\Models\Recipe
      */
-    public function show($id)
+    public function show(Recipe $recipe)
     {
-        //
+        return new RecipeResource($recipe);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
+     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\Recipe  $recipe
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Recipe $recipe)
     {
-        $recipe = Recipe::where('id', $id)->first();
         $recipe->name = $request->name;
         $recipe->save();
         return new RecipeResource($recipe);
@@ -99,11 +76,12 @@ class RecipeController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\Recipe  $recipe
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Recipe $recipe)
     {
-        //
+        $recipe->delete();
+        return response()->noContent();
     }
 }
