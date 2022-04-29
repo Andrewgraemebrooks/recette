@@ -2,11 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\Ingredient;
 use App\Models\Recipe;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 use Illuminate\Support\Str;
@@ -34,8 +32,7 @@ class StoreRecipeTest extends TestCase
             ];
         })->toArray();
         $this->assertEquals($recipe->name, $data['name']);
-        $this->assertArrayHasKey('name', $ingredients[0]);
-        $this->assertEqualsCanonicalizing($data['ingredients'], $ingredients);
+        $this->assertEqualsCanonicalizing($ingredients, $data['ingredients']);
     }
 
     /** @test */
@@ -154,8 +151,6 @@ class StoreRecipeTest extends TestCase
 
         $response->assertCreated();
     }
-
-
 
     protected function getRecipeData($merge = []): array
     {
