@@ -32,6 +32,7 @@ Route::post('/category', [CategoryController::class, 'store'])->name('category.s
 
 // Ingredients
 Route::post('/ingredient', [IngredientController::class, 'store'])->name('ingredient.store');
+Route::delete('/ingredient/{ingredient}', [IngredientController::class, 'destroy'])->name('ingredient.destroy');
 
 // Testing
 Route::get('/test-csrf-token', [TestController::class, 'index'])->name('csrf.index');

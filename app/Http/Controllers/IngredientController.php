@@ -20,19 +20,9 @@ class IngredientController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
-     * @param  \App\Http\Requests\IngredientRequest;  $request
+     * @param  \App\Http\Requests\StoreIngredientRequest;  $request
      * @return \Illuminate\Http\Response
      */
     public function store(StoreIngredientRequest $request)
@@ -50,17 +40,6 @@ class IngredientController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show(Ingredient $ingredient)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Ingredient  $ingredient
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Ingredient $ingredient)
     {
         //
     }
@@ -85,6 +64,7 @@ class IngredientController extends Controller
      */
     public function destroy(Ingredient $ingredient)
     {
-        //
+        $ingredient->delete();
+        return response()->noContent();
     }
 }
