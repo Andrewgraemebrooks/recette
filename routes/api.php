@@ -26,6 +26,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::post('/recipe', [RecipeController::class, 'store'])->name('recipe.store');
 Route::put('/recipe/{recipe}', [RecipeController::class, 'update'])->name('recipe.update');
 Route::get('/recipe', [RecipeController::class, 'index'])->name('recipe.index');
+Route::delete('/recipe/{recipe}', [RecipeController::class, 'destroy'])->name('recipe.destroy');
+Route::get('/recipe/{recipe}', [RecipeController::class, 'show'])->name('recipe.show');
 
 // Categories
 Route::post('/category', [CategoryController::class, 'store'])->name('category.store');

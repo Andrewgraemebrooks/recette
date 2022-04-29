@@ -18,7 +18,7 @@ class UpdateRecipeTest extends TestCase
                 ['amount'=> 3]
             )->create();
 
-        $response = $this->putJson(route('recipe.update', $recipe->id), [
+        $response = $this->putJson(route('recipe.update', $recipe), [
             'name' => 'new-ingredient-name'
         ]);
 
