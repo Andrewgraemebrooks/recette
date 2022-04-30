@@ -7,7 +7,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
-use Illuminate\Support\Str;
 
 class StoreRecipeTest extends TestCase
 {
@@ -88,17 +87,6 @@ class StoreRecipeTest extends TestCase
 
         $response = $this->postJson(route('recipe.store'), $data);
         $response->assertJsonValidationErrors('name');
-    }
-
-    /** @test */
-    public function the_recipe_id_is_a_uuid()
-    {
-        $data = $this->getRecipeData();
-
-        $this->postJson(route('recipe.store'), $data);
-
-        $recipe = Recipe::first();
-        $this->assertTrue(Str::isUuid($recipe->id));
     }
 
     /** @test */
