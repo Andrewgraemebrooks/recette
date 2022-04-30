@@ -3,7 +3,6 @@
 use App\Models\Ingredient;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use Illuminate\Support\Str;
 
 class StoreIngredientsTest extends TestCase
 {
@@ -33,17 +32,6 @@ class StoreIngredientsTest extends TestCase
         $response = $this->postJson(route('ingredient.store'), $data);
 
         $response->assertJsonValidationErrors('name');
-    }
-
-    /** @test */
-    public function a_ingredient_id_is_a_uuid()
-    {
-        $data = $this->getIngredientData();
-
-        $this->postJson(route('ingredient.store'), $data);
-
-        $ingredient = Ingredient::first();
-        $this->assertTrue(Str::isUuid($ingredient->id));
     }
 
     protected function getIngredientData($merge = []): array
