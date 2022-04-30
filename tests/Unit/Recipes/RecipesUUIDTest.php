@@ -2,8 +2,8 @@
 
 use App\Models\Recipe;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use Illuminate\Support\Str;
+use Tests\TestCase;
 
 class RecipesUUIDTest extends TestCase
 {
