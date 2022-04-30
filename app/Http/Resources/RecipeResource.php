@@ -16,7 +16,7 @@ class RecipeResource extends JsonResource
     {
         return [
             'name' => $this->name,
-            'ingredients' => IngredientResource::collection($this->ingredients)
+            'ingredients' => RecipeIngredientResource::collection($this->ingredients)
         ];
     }
 }

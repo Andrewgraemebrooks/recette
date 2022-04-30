@@ -33,7 +33,11 @@ Route::get('/recipe/{recipe}', [RecipeController::class, 'show'])->name('recipe.
 Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
 
 // Ingredients
+Route::get('/ingredient', [IngredientController::class, 'index'])->name('ingredient.index');
+Route::get('/ingredient/{ingredient}', [IngredientController::class, 'show'])->name('ingredient.show');
 Route::post('/ingredient', [IngredientController::class, 'store'])->name('ingredient.store');
+Route::put('/ingredient/{ingredient}', [IngredientController::class, 'update'])->name('ingredient.update');
+Route::delete('/ingredient/{ingredient}', [IngredientController::class, 'destroy'])->name('ingredient.destroy');
 
 // Testing
 Route::get('/test-csrf-token', [TestController::class, 'index'])->name('csrf.index');
