@@ -16,7 +16,8 @@ class IngredientController extends Controller
      */
     public function index()
     {
-        //
+        $ingredients = Ingredient::all();
+        return IngredientResource::collection($ingredients);
     }
 
     /**
@@ -41,7 +42,7 @@ class IngredientController extends Controller
      */
     public function show(Ingredient $ingredient)
     {
-        //
+        return new IngredientResource($ingredient);
     }
 
     /**
