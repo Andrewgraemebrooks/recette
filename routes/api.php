@@ -32,6 +32,7 @@ Route::delete('/recipe/{recipe}', [RecipeController::class, 'destroy'])->name('r
 // Categories
 Route::get('/category', [CategoryController::class, 'index'])->name('category.index');
 Route::post('/category', [CategoryController::class, 'store'])->name('category.store');
+Route::put('/category/{category}', [CategoryController::class, 'update'])->name('category.update');
 
 // Ingredients
 Route::get('/ingredient', [IngredientController::class, 'index'])->name('ingredient.index');
