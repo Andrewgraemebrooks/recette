@@ -140,6 +140,76 @@ class StoreRecipeTest extends TestCase
         $response->assertCreated();
     }
 
+    /** @test */
+    public function a_recipe_can_have_a_rating()
+    {
+        $data = $this->getRecipeData([
+            'rating' => 0
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertCreated();
+        $recipe = Recipe::first();
+        $this->assertDatabaseHas('recipes', [
+            'id' => $recipe->id,
+            'rating' => 0
+        ]);
+    }
+
+    /** @test */
+    public function a_recipe_can_be_a_string_but_must_be_a_valid_number()
+    {
+        $data = $this->getRecipeData([
+            'rating' => '5'
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertCreated();
+        $recipe = Recipe::first();
+        $this->assertDatabaseHas('recipes', [
+            'id' => $recipe->id,
+            'rating' => 5
+        ]);
+    }
+
+    /** @test */
+    public function a_recipe_rating_must_be_a_valid_number()
+    {
+        $data = $this->getRecipeData([
+            'rating' => 'not-a-number'
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertJsonValidationErrors('rating');
+    }
+
+    /** @test */
+    public function a_recipe_rating_must_be_zero_or_greater()
+    {
+        $data = $this->getRecipeData([
+            'rating' => -1
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertJsonValidationErrors('rating');
+    }
+
+    /** @test */
+    public function a_recipe_rating_must_be_five_or_less()
+    {
+        $data = $this->getRecipeData([
+            'rating' => 6
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertJsonValidationErrors('rating');
+    }
+
     protected function getRecipeData($merge = []): array
     {
         return array_merge([

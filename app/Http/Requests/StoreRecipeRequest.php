@@ -25,7 +25,8 @@ class StoreRecipeRequest extends FormRequest
     {
         return [
             'name' => 'required|unique:recipes|string',
-            'ingredients' => 'required|array'
+            'ingredients' => 'required|array',
+            'rating' => 'integer|between:0,5'
         ];
     }
 }
