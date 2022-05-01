@@ -32,6 +32,9 @@ class RecipeController extends Controller
     {
         $recipe = new Recipe();
         $recipe->name = $request->name;
+        if ($request->rating || $request->rating === 0) {
+            $recipe->rating = $request->rating;
+        }
         $recipe->save();
         foreach ($request->ingredients as $ingredient) {
             $name = $ingredient['name'];
