@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Ingredient;
 use App\Models\Recipe;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -57,7 +58,6 @@ class StoreRecipeTest extends TestCase
         ]);
     }
 
-
     /** @test */
     public function a_name_is_required_for_recipe_creation()
     {
@@ -92,18 +92,36 @@ class StoreRecipeTest extends TestCase
     /** @test */
     public function the_ingredients_must_be_an_array()
     {
-        $ingredients = json_encode([
+        $ingredientsAsString = json_encode([
             ['name' => 'some-ingredient', 'amount' => 1],
             ['name' => 'some-other-ingredient', 'amount' => 4],
         ]);
         $data = $this->getRecipeData([
-            'ingredients' => $ingredients
+            'ingredients' => $ingredientsAsString
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertJsonValidationErrors('ingredients');
     }
+
+    /** @test */
+    public function if_the_ingredient_already_exists_a_new_ingredient_is_not_created()
+    {
+        $alreadyExistingIngredient = Ingredient::factory()->create();
+        $this->assertDatabaseCount('ingredients', 1);
+        $data = $this->getRecipeData([
+            'ingredients' => [
+                ['name' => $alreadyExistingIngredient->name, 'amount' => 1]
+            ]
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertCreated();
+        $this->assertDatabaseCount('ingredients', 1);
+    }
+
 
     /** @test */
     public function a_name_must_be_a_string_for_recipe_creation()
