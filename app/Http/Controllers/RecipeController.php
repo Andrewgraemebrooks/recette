@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRecipeRequest;
+use App\Http\Requests\UpdateRecipeRequest;
 use App\Http\Resources\RecipeResource;
 use App\Models\Ingredient;
 use App\Models\Recipe;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class RecipeController extends Controller
@@ -39,9 +39,14 @@ class RecipeController extends Controller
         foreach ($request->ingredients as $ingredient) {
             $name = $ingredient['name'];
             $amount = $ingredient['amount'];
-            $new_ingredient = new Ingredient();
-            $new_ingredient->name = $name;
-            $recipe->ingredients()->save($new_ingredient, ['amount' => $amount]);
+            if (Ingredient::where('name', $name)->exists()) {
+                $existingIngredient = Ingredient::first('name', $name);
+                $recipe->ingredients()->attach($existingIngredient->id, ['amount' => $amount]);
+                continue;
+            }
+            $newIngredient = new Ingredient();
+            $newIngredient->name = $name;
+            $recipe->ingredients()->save($newIngredient, ['amount' => $amount]);
         }
         if ($request->images) {
             foreach ($request->images as $image) {
@@ -65,14 +70,41 @@ class RecipeController extends Controller
      /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Http\Requests\UpdateRecipeRequest  $request
      * @param  \App\Models\Recipe  $recipe
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Recipe $recipe)
+    public function update(UpdateRecipeRequest $request, Recipe $recipe)
     {
-        $recipe->name = $request->name;
-        $recipe->save();
+        if ($request->name) {
+            $recipe->name = $request->name;
+        }
+        if ($request->ingredients) {
+            $recipe->ingredients()->detach();
+            foreach ($request->ingredients as $ingredient) {
+                $name = $ingredient['name'];
+                $amount = $ingredient['amount'];
+                if (Ingredient::where('name', $name)->exists()) {
+                    $existingIngredient = Ingredient::first('name', $name);
+                    $recipe->ingredients()->attach($existingIngredient->id, ['amount' => $amount]);
+                    continue;
+                }
+                $newIngredient = new Ingredient();
+                $newIngredient->name = $name;
+                $recipe->ingredients()->save($newIngredient, ['amount' => $amount]);
+            }
+        }
+        if ($request->images) {
+            foreach ($request->images as $image) {
+                Storage::put($image->name, $image);
+            }
+        }
+        if ($request->rating) {
+            $recipe->rating = $request->rating;
+        }
+        if ($recipe->isDirty()) {
+            $recipe->save();
+        }
         return new RecipeResource($recipe);
     }
 
