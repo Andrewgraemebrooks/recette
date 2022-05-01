@@ -175,7 +175,7 @@ class StoreRecipeTest extends TestCase
     }
 
     /** @test */
-    public function a_recipe_rating_must_be_an_integer()
+    public function a_recipe_rating_must_be_a_valid_number()
     {
         $data = $this->getRecipeData([
             'rating' => 'not-a-number'
