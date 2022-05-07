@@ -2,25 +2,64 @@
 
 use App\Models\Ingredient;
 use App\Models\Recipe;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class UpdateRecipeTest extends TestCase
 {
     use RefreshDatabase;
 
+    private $user;
     private $recipe;
 
     protected function setUp(): void
     {
         parent::setUp();
+        $this->user = User::factory()->create();
+        Sanctum::actingAs($this->user, ['*']);
+        $ingredients = Ingredient::factory()->count(2)->create([
+            'user_id' => $this->user->id
+        ]);
         $this->recipe = Recipe::factory()
             ->hasAttached(
-                Ingredient::factory()->count(2),
+                $ingredients,
                 ['amount' => 3]
-            )->create();
+            )->create([
+                'user_id' => $this->user->id
+            ]);
+    }
+
+    /** @test */
+    public function a_user_can_update_their_recipe()
+    {
+        $response = $this->putJson(route('recipe.update', $this->recipe), [
+            'name' => 'new-ingredient-name'
+        ]);
+
+        $response->assertOk();
+        $this->recipe->refresh();
+        $this->assertEquals($this->recipe->name, 'new-ingredient-name');
+    }
+
+    /** @test */
+    public function a_user_cannot_update_another_users_recipe()
+    {
+        $someOtherUser = User::factory()->create();
+        $someOtherUsersRecipe = Recipe::factory()->create([
+            'user_id' => $someOtherUser->id
+        ]);
+
+        $response = $this->putJson(route('recipe.update', $someOtherUsersRecipe), [
+            'name' => 'new-ingredient-name'
+        ]);
+
+        $response->assertStatus(404);
+        $this->recipe->refresh();
+        $this->assertNotEquals($someOtherUsersRecipe->name, 'new-ingredient-name');
     }
 
     /** @test */
@@ -48,7 +87,9 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function a_recipe_name_must_be_unique()
     {
-        $differentRecipe = Recipe::factory()->create();
+        $differentRecipe = Recipe::factory()->create([
+            'user_id' => $this->user->id
+        ]);
 
         $response = $this->putJson(route('recipe.update', $this->recipe), [
             'name' => $differentRecipe->name
@@ -73,6 +114,7 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function a_recipes_ingredients_can_be_updated()
     {
+        $this->withoutExceptionHandling();
         $newIngredients = [
             ['name' => 'updated-ingredient', 'amount' => 1],
             ['name' => 'some-other-updated-ingredient', 'amount' => 4],
@@ -91,7 +133,9 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function if_the_ingredient_already_exists_a_new_ingredient_is_not_created()
     {
-        $alreadyExistingIngredient = Ingredient::factory()->create();
+        $alreadyExistingIngredient = Ingredient::factory()->create([
+            'user_id' => $this->user->id
+        ]);
         $existingIngredientCount = Ingredient::all()->count();
 
         $response = $this->putJson(route('recipe.update', $this->recipe), [
@@ -102,6 +146,50 @@ class UpdateRecipeTest extends TestCase
 
         $response->assertOk();
         $this->assertDatabaseCount('ingredients', $existingIngredientCount);
+    }
+
+
+    /** @test */
+    public function if_the_existing_ingredient_was_created_by_another_user_a_new_one_is_created_for_this_user()
+    {
+        $someOtherUser = User::factory()->create();
+        $alreadyExistingIngredient = Ingredient::factory()->create([
+            'user_id' => $someOtherUser->id
+        ]);
+        $existingIngredientCount = Ingredient::all()->count();
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), [
+            'ingredients' => [
+                ['name' => $alreadyExistingIngredient->name, 'amount' => 1]
+            ]
+        ]);
+
+        $response->assertOk();
+        $this->assertDatabaseCount('ingredients', $existingIngredientCount + 1);
+    }
+
+    /** @test */
+    public function if_the_ingredient_already_exists_it_is_used_in_the_recipe()
+    {
+        $alreadyExistingIngredient = Ingredient::factory()->create([
+            'user_id' => $this->user->id
+        ]);
+        $someOtherUser = User::factory()->create();
+        $otherUsersIngredientWithSameName = Ingredient::factory()->create([
+            'user_id' => $someOtherUser->id,
+            'name' => $alreadyExistingIngredient->name
+        ]);
+        $response = $this->putJson(route('recipe.update', $this->recipe), [
+            'ingredients' => [
+                ['name' => $alreadyExistingIngredient->name, 'amount' => 1]
+            ]
+        ]);
+
+        $recipeIngredients = $this->recipe->ingredients;
+        $this->assertTrue($recipeIngredients->contains($alreadyExistingIngredient));
+        $this->assertNotTrue($recipeIngredients->contains($otherUsersIngredientWithSameName));
+
+        $response->assertOk();
     }
 
 

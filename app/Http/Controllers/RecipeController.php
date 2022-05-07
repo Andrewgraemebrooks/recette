@@ -18,7 +18,8 @@ class RecipeController extends Controller
      */
     public function index()
     {
-        $recipes = Recipe::all();
+        $user = auth()->user();
+        $recipes = Recipe::where('user_id', $user->id)->get();
         return RecipeResource::collection($recipes);
     }
 
@@ -30,22 +31,25 @@ class RecipeController extends Controller
      */
     public function store(StoreRecipeRequest $request)
     {
+        $user = auth()->user();
         $recipe = new Recipe();
         $recipe->name = $request->name;
         if ($request->rating || $request->rating === 0) {
             $recipe->rating = $request->rating;
         }
+        $recipe->user_id = $user->id;
         $recipe->save();
         foreach ($request->ingredients as $ingredient) {
             $name = $ingredient['name'];
             $amount = $ingredient['amount'];
-            if (Ingredient::where('name', $name)->exists()) {
-                $existingIngredient = Ingredient::first('name', $name);
+            if (Ingredient::where(['name' => $name, 'user_id' => $user->id])->exists()) {
+                $existingIngredient = Ingredient::firstWhere(['name' => $name, 'user_id' => $user->id]);
                 $recipe->ingredients()->attach($existingIngredient->id, ['amount' => $amount]);
                 continue;
             }
             $newIngredient = new Ingredient();
             $newIngredient->name = $name;
+            $newIngredient->user_id = $user->id;
             $recipe->ingredients()->save($newIngredient, ['amount' => $amount]);
         }
         if ($request->images) {
@@ -64,6 +68,10 @@ class RecipeController extends Controller
      */
     public function show(Recipe $recipe)
     {
+        $user = auth()->user();
+        if ($recipe->user->id !== $user->id) {
+            abort(404, 'Cannot find recipe');
+        }
         return new RecipeResource($recipe);
     }
 
@@ -76,6 +84,10 @@ class RecipeController extends Controller
      */
     public function update(UpdateRecipeRequest $request, Recipe $recipe)
     {
+        $user = auth()->user();
+        if ($recipe->user->id !== $user->id) {
+            abort(404, 'Cannot find recipe');
+        }
         if ($request->name) {
             $recipe->name = $request->name;
         }
@@ -84,13 +96,14 @@ class RecipeController extends Controller
             foreach ($request->ingredients as $ingredient) {
                 $name = $ingredient['name'];
                 $amount = $ingredient['amount'];
-                if (Ingredient::where('name', $name)->exists()) {
-                    $existingIngredient = Ingredient::first('name', $name);
+                if (Ingredient::where(['name' => $name, 'user_id' => $user->id])->exists()) {
+                    $existingIngredient = Ingredient::firstWhere(['name' => $name, 'user_id' => $user->id]);
                     $recipe->ingredients()->attach($existingIngredient->id, ['amount' => $amount]);
                     continue;
                 }
                 $newIngredient = new Ingredient();
                 $newIngredient->name = $name;
+                $newIngredient->user_id = $user->id;
                 $recipe->ingredients()->save($newIngredient, ['amount' => $amount]);
             }
         }
@@ -116,6 +129,10 @@ class RecipeController extends Controller
      */
     public function destroy(Recipe $recipe)
     {
+        $user = auth()->user();
+        if ($recipe->user->id !== $user->id) {
+            abort(404, 'Cannot find recipe');
+        }
         $recipe->delete();
         return response()->noContent();
     }
