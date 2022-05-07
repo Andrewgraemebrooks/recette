@@ -38,7 +38,7 @@ class StoreRecipeTest extends TestCase
     /** @test */
     public function the_correct_recipe_information_is_returned_on_successful_creation()
     {
-        $data = $this->getRecipeData();
+        $data = $this->getRecipeData(); 
 
         $response = $this->postJson(route('recipe.store'), $data);
 
