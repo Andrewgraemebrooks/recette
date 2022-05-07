@@ -35,30 +35,6 @@ class StoreRecipeTest extends TestCase
     }
 
     /** @test */
-    public function the_correct_recipe_information_is_returned_on_successful_creation()
-    {
-        $data = $this->getRecipeData();
-
-        $response = $this->postJson(route('recipe.store'), $data);
-
-        $recipe = Recipe::first();
-        $response->assertJsonFragment([
-            'name' => $recipe->name,
-            'ingredients' => [
-                [
-                    'name' => $recipe->ingredients[0]->name,
-                    'amount' => $recipe->ingredients[0]->pivot->amount
-                ],
-                [
-                    'name' => $recipe->ingredients[1]->name,
-                    'amount' => $recipe->ingredients[1]->pivot->amount
-                ],
-            ]
-        ]);
-    }
-
-
-    /** @test */
     public function a_name_is_required_for_recipe_creation()
     {
         $data = $this->getRecipeData(['name' => null]);
