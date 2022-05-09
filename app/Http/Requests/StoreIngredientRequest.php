@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreIngredientRequest extends FormRequest
 {
@@ -24,7 +26,8 @@ class StoreIngredientRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'unique:ingredients,name'
+            'name' => Rule::unique('ingredients')->where(fn ($query) => $query->where('user_id', Auth::user()->id)),
+            // 'name' => 'string'
         ];
     }
 }

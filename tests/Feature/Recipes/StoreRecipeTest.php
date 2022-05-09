@@ -92,12 +92,33 @@ class StoreRecipeTest extends TestCase
     /** @test */
     public function a_recipe_name_must_be_unique()
     {
-        $data = $this->getRecipeData();
-
-        $this->postJson(route('recipe.store'), $data);
+        $existingRecipe = Recipe::factory()->create([
+            'user_id' => $this->user->id
+        ]);
+        $data = $this->getRecipeData([
+            'name' => $existingRecipe->name
+        ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
         $response->assertJsonValidationErrors('name');
+    }
+
+    /** @test */
+    public function a_recipe_name_is_only_unique_to_this_users_recipes()
+    {
+        $someOtherUser = User::factory()->create();
+        $existingRecipe = Recipe::factory()->create([
+            'user_id' => $someOtherUser->id
+        ]);
+        $this->assertDatabaseCount('recipes', 1);
+        $data = $this->getRecipeData([
+            'name' => $existingRecipe->name
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+        $response->assertCreated();
+        $recipesWithTheName = Recipe::where('name', $existingRecipe->name)->get();
+        $this->assertCount(2, $recipesWithTheName->count());
     }
 
     /** @test */

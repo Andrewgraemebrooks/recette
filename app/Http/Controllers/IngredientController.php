@@ -17,7 +17,8 @@ class IngredientController extends Controller
      */
     public function index()
     {
-        $ingredients = Ingredient::all();
+        $user = auth()->user();
+        $ingredients = Ingredient::where('user_id', $user->id)->get();
         return IngredientResource::collection($ingredients);
     }
 
@@ -29,8 +30,10 @@ class IngredientController extends Controller
      */
     public function store(StoreIngredientRequest $request)
     {
+        $user = auth()->user();
         $ingredient = new Ingredient();
         $ingredient->name = $request->name;
+        $ingredient->user_id = $user->id;
         $ingredient->save();
         return new IngredientResource($ingredient);
     }
@@ -43,6 +46,10 @@ class IngredientController extends Controller
      */
     public function show(Ingredient $ingredient)
     {
+        $user = auth()->user();
+        if ($ingredient->user->id !== $user->id) {
+            abort(404, 'Cannot find ingredient');
+        }
         return new IngredientResource($ingredient);
     }
 
@@ -68,6 +75,10 @@ class IngredientController extends Controller
      */
     public function destroy(Ingredient $ingredient)
     {
+        $user = auth()->user();
+        if ($ingredient->user->id !== $user->id) {
+            abort(404, 'Cannot find ingredient');
+        }
         $ingredient->delete();
         return response()->noContent();
     }
