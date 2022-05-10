@@ -118,7 +118,7 @@ class StoreRecipeTest extends TestCase
         $response = $this->postJson(route('recipe.store'), $data);
         $response->assertCreated();
         $recipesWithTheName = Recipe::where('name', $existingRecipe->name)->get();
-        $this->assertCount(2, $recipesWithTheName->count());
+        $this->assertEquals(2, $recipesWithTheName->count());
     }
 
     /** @test */

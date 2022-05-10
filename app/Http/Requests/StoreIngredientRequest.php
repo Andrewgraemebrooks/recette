@@ -26,8 +26,7 @@ class StoreIngredientRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => Rule::unique('ingredients')->where(fn ($query) => $query->where('user_id', Auth::user()->id)),
-            // 'name' => 'string'
+            'name' => [Rule::unique('ingredients')->where(fn ($query) => $query->where('user_id', Auth::user()->id)), 'string'],
         ];
     }
 }

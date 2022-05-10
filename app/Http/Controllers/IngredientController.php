@@ -62,8 +62,16 @@ class IngredientController extends Controller
      */
     public function update(UpdateIngredientRequest $request, Ingredient $ingredient)
     {
-        $ingredient->name = $request->name;
-        $ingredient->save();
+        $user = auth()->user();
+        if ($ingredient->user->id !== $user->id) {
+            abort(404, 'Cannot find ingredient');
+        }
+        if ($request->name) {
+            $ingredient->name = $request->name;
+        }
+        if ($ingredient->isDirty()) {
+            $ingredient->save();
+        }
         return new IngredientResource($ingredient);
     }
 
