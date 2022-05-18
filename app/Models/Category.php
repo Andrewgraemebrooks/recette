@@ -10,4 +10,9 @@ class Category extends Model
 {
     use HasFactory;
     use UsesUuid;
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

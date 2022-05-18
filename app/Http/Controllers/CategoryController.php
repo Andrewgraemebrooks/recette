@@ -42,6 +42,10 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
+        $user = auth()->user();
+        if ($category->user->id !== $user->id) {
+            abort(404, 'Cannot find category');
+        }
         return new CategoryResource($category);
     }
 
