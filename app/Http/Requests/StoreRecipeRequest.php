@@ -27,7 +27,6 @@ class StoreRecipeRequest extends FormRequest
     {
         return [
             'name' => [Rule::unique('recipes')->where(fn ($query) => $query->where('user_id', Auth::user()->id)), 'required', 'string'],
-            // 'name' => 'required|string',
             'ingredients' => 'required|array',
             'rating' => 'integer|between:0,5'
         ];

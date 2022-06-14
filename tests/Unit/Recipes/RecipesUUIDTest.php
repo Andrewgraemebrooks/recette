@@ -13,10 +13,7 @@ class RecipesUUIDTest extends TestCase
     /** @test */
     public function the_recipe_id_is_a_uuid()
     {
-        $user = User::factory()->create();
-        $recipe = Recipe::factory()->create([
-            'user_id' => $user->id
-        ]);
+        $recipe = Recipe::factory()->create();
         $this->assertTrue(Str::isUuid($recipe->id));
     }
 }
