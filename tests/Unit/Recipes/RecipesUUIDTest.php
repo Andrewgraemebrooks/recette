@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Recipe;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;

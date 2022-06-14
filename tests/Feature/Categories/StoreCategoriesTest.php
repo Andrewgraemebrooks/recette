@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class StoreCategoriesTest extends TestCase
@@ -11,6 +13,8 @@ class StoreCategoriesTest extends TestCase
     /** @test */
     public function a_category_can_be_created()
     {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
         $data = $this->getCategoryData();
 
         $response = $this->postJson(route('category.store'), $data);
@@ -24,6 +28,8 @@ class StoreCategoriesTest extends TestCase
     /** @test */
     public function a_category_name_must_be_unique()
     {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
         $data = $this->getCategoryData([
             'name' => 'same-category-name'
         ]);

@@ -4,17 +4,28 @@ namespace Tests\Feature;
 
 use App\Models\Ingredient;
 use App\Models\Recipe;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
 class StoreRecipeTest extends TestCase
 {
     use RefreshDatabase;
 
+    private $user;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->user = User::factory()->create();
+        Sanctum::actingAs($this->user, ['*']);
+    }
+
     /** @test */
-    public function a_recipe_can_be_stored_in_database()
+    public function a_user_can_store_a_recipe()
     {
         $data = $this->getRecipeData();
 
@@ -81,12 +92,33 @@ class StoreRecipeTest extends TestCase
     /** @test */
     public function a_recipe_name_must_be_unique()
     {
-        $data = $this->getRecipeData();
-
-        $this->postJson(route('recipe.store'), $data);
+        $existingRecipe = Recipe::factory()->create([
+            'user_id' => $this->user->id
+        ]);
+        $data = $this->getRecipeData([
+            'name' => $existingRecipe->name
+        ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
         $response->assertJsonValidationErrors('name');
+    }
+
+    /** @test */
+    public function a_recipe_name_is_only_unique_to_this_users_recipes()
+    {
+        $someOtherUser = User::factory()->create();
+        $existingRecipe = Recipe::factory()->create([
+            'user_id' => $someOtherUser->id
+        ]);
+        $this->assertDatabaseCount('recipes', 1);
+        $data = $this->getRecipeData([
+            'name' => $existingRecipe->name
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+        $response->assertCreated();
+        $recipesWithTheName = Recipe::where('name', $existingRecipe->name)->get();
+        $this->assertEquals(2, $recipesWithTheName->count());
     }
 
     /** @test */
@@ -108,7 +140,9 @@ class StoreRecipeTest extends TestCase
     /** @test */
     public function if_the_ingredient_already_exists_a_new_ingredient_is_not_created()
     {
-        $alreadyExistingIngredient = Ingredient::factory()->create();
+        $alreadyExistingIngredient = Ingredient::factory()->create([
+            'user_id' => $this->user->id
+        ]);
         $this->assertDatabaseCount('ingredients', 1);
         $data = $this->getRecipeData([
             'ingredients' => [
@@ -120,6 +154,52 @@ class StoreRecipeTest extends TestCase
 
         $response->assertCreated();
         $this->assertDatabaseCount('ingredients', 1);
+    }
+
+    /** @test */
+    public function if_the_existing_ingredient_was_created_by_another_user_a_new_one_is_created_for_this_user()
+    {
+        $someOtherUser = User::factory()->create();
+        $alreadyExistingIngredient = Ingredient::factory()->create([
+            'user_id' => $someOtherUser->id
+        ]);
+        $this->assertDatabaseCount('ingredients', 1);
+        $data = $this->getRecipeData([
+            'ingredients' => [
+                ['name' => $alreadyExistingIngredient->name, 'amount' => 1]
+            ]
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertCreated();
+        $this->assertDatabaseCount('ingredients', 2);
+    }
+
+    /** @test */
+    public function if_the_ingredient_already_exists_it_is_used_in_the_recipe()
+    {
+        $alreadyExistingIngredient = Ingredient::factory()->create([
+            'user_id' => $this->user->id
+        ]);
+        $someOtherUser = User::factory()->create();
+        $otherUsersIngredientWithSameName = Ingredient::factory()->create([
+            'user_id' => $someOtherUser->id,
+            'name' => $alreadyExistingIngredient->name
+        ]);
+        $data = $this->getRecipeData([
+            'ingredients' => [
+                ['name' => $alreadyExistingIngredient->name, 'amount' => 1]
+            ]
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+        $recipe = Recipe::first();
+        $recipeIngredients = $recipe->ingredients;
+        $this->assertTrue($recipeIngredients->contains($alreadyExistingIngredient));
+        $this->assertNotTrue($recipeIngredients->contains($otherUsersIngredientWithSameName));
+
+        $response->assertCreated();
     }
 
 

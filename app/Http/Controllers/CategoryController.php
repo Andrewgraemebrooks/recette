@@ -16,7 +16,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::all();
+        $user = auth()->user();
+        $categories = Category::where('user_id', $user->id)->get();
         return CategoryResource::collection($categories);
     }
 
@@ -28,8 +29,10 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request)
     {
+        $user = auth()->user();
         $category = new Category();
         $category->name = $request->name;
+        $category->user_id = $user->id;
         $category->save();
         return new CategoryResource($category);
     }
@@ -42,6 +45,10 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
+        $user = auth()->user();
+        if ($category->user->id !== $user->id) {
+            abort(404, 'Cannot find category');
+        }
         return new CategoryResource($category);
     }
 
@@ -54,8 +61,16 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, Category $category)
     {
-        $category->name = $request->name;
-        $category->save();
+        $user = auth()->user();
+        if ($category->user->id !== $user->id) {
+            abort(404, 'Cannot find category');
+        }
+        if ($request->name) {
+            $category->name = $request->name;
+        }
+        if ($category->isDirty()) {
+            $category->save();
+        }
         return new CategoryResource($category);
     }
 
