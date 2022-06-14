@@ -74,4 +74,25 @@ class UpdateCategoriesTest extends TestCase
 
         $response->assertJsonValidationErrors('name');
     }
+
+    /** @test */
+    public function a_user_cannot_update_another_users_category()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+        $someOtherUser = User::factory()->create();
+        $category = Category::factory()->create([
+            'user_id' => $someOtherUser->id,
+        ]);
+
+        $response = $this->putJson(route('category.update', $category), [
+            'name' => 'some-new-name'
+        ]);
+
+        $response->assertStatus(404);
+        $this->assertDatabaseMissing('ingredients', [
+            'name' => 'some-new-name'
+        ]);
+    }
+
 }
