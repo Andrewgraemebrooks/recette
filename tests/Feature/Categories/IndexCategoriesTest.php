@@ -29,4 +29,24 @@ class IndexCategoriesTest extends TestCase
         }
     }
 
+    /** @test */
+    public function the_categories_of_other_users_are_not_returned()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+        $someOtherUser = User::factory()->create();
+        $categories = Category::factory()->count(3)->create([
+            'user_id' => $someOtherUser->id
+        ]);
+
+        $response = $this->getJson(route('category.index'));
+
+        $response->assertOk();
+        foreach ($categories as $category) {
+            $response->assertJsonMissing([
+                'name' => $category->name
+            ]);
+        }
+    }
+
 }

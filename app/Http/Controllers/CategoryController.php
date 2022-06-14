@@ -16,7 +16,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::all();
+        $user = auth()->user();
+        $categories = Category::where('user_id', $user->id)->get();
         return CategoryResource::collection($categories);
     }
 
