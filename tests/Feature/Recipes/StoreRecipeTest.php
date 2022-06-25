@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use App\Models\User;
@@ -307,6 +308,34 @@ class StoreRecipeTest extends TestCase
 
         $response->assertJsonValidationErrors('rating');
     }
+
+    /** @test */
+    public function a_recipe_can_be_assigned_to_a_category()
+    {
+        $category = Category::factory()->create([
+            'user_id' => $this->user->id
+        ]);
+        $data = $this->getRecipeData([
+            'category_id' => $category->id
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertCreated();
+        $recipe = Recipe::first();
+        $this->assertDatabaseHas('recipes', [
+            'id' => $recipe->id,
+            'category_id' => $category->id
+        ]);
+    }
+
+    /** @test */
+    public function a_recipe_cannot_be_assigned_to_more_than_one_categories()
+    {
+        $this->assertTrue(false);
+    }
+
+
 
     protected function getRecipeData($merge = []): array
     {
