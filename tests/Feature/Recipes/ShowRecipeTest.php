@@ -17,14 +17,14 @@ class ShowRecipeTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $ingredient = Ingredient::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $recipe = Recipe::factory()
             ->hasAttached(
                 $ingredient,
                 ['amount'=> 1]
             )->create([
-                'user_id' => $user->id
+                'user_id' => $user->id,
             ]);
 
         $response = $this->getJson(route('recipe.show', $recipe));
@@ -35,9 +35,9 @@ class ShowRecipeTest extends TestCase
             'ingredients' => [
                 [
                     'name' => $recipe->ingredients[0]->name,
-                    'amount' => $recipe->ingredients[0]->pivot->amount
-                ]
-            ]
+                    'amount' => $recipe->ingredients[0]->pivot->amount,
+                ],
+            ],
         ]);
     }
 
@@ -48,14 +48,14 @@ class ShowRecipeTest extends TestCase
         Sanctum::actingAs($user, ['*']);
         $someOtherUser = User::factory()->create();
         $ingredient = Ingredient::factory()->create([
-            'user_id' => $someOtherUser->id
+            'user_id' => $someOtherUser->id,
         ]);
         $recipe = Recipe::factory()
             ->hasAttached(
                 $ingredient,
                 ['amount'=> 1]
             )->create([
-                'user_id' => $someOtherUser->id
+                'user_id' => $someOtherUser->id,
             ]);
 
         $response = $this->getJson(route('recipe.show', $recipe));
@@ -66,11 +66,9 @@ class ShowRecipeTest extends TestCase
             'ingredients' => [
                 [
                     'name' => $recipe->ingredients[0]->name,
-                    'amount' => $recipe->ingredients[0]->pivot->amount
-                ]
-            ]
+                    'amount' => $recipe->ingredients[0]->pivot->amount,
+                ],
+            ],
         ]);
     }
-
-
 }

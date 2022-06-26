@@ -18,6 +18,7 @@ class CategoryController extends Controller
     {
         $user = auth()->user();
         $categories = Category::where('user_id', $user->id)->get();
+
         return CategoryResource::collection($categories);
     }
 
@@ -34,6 +35,7 @@ class CategoryController extends Controller
         $category->name = $request->name;
         $category->user_id = $user->id;
         $category->save();
+
         return new CategoryResource($category);
     }
 
@@ -49,6 +51,7 @@ class CategoryController extends Controller
         if ($category->user->id !== $user->id) {
             abort(404, 'Cannot find category');
         }
+
         return new CategoryResource($category);
     }
 
@@ -71,6 +74,7 @@ class CategoryController extends Controller
         if ($category->isDirty()) {
             $category->save();
         }
+
         return new CategoryResource($category);
     }
 
@@ -83,6 +87,7 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $category->delete();
+
         return response()->noContent();
     }
 }

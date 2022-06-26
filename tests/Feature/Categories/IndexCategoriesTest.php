@@ -16,7 +16,7 @@ class IndexCategoriesTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $categories = Category::factory()->count(3)->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $response = $this->getJson(route('category.index'));
@@ -24,7 +24,7 @@ class IndexCategoriesTest extends TestCase
         $response->assertOk();
         foreach ($categories as $category) {
             $response->assertJsonFragment([
-                'name' => $category->name
+                'name' => $category->name,
             ]);
         }
     }
@@ -36,7 +36,7 @@ class IndexCategoriesTest extends TestCase
         Sanctum::actingAs($user, ['*']);
         $someOtherUser = User::factory()->create();
         $categories = Category::factory()->count(3)->create([
-            'user_id' => $someOtherUser->id
+            'user_id' => $someOtherUser->id,
         ]);
 
         $response = $this->getJson(route('category.index'));
@@ -44,9 +44,8 @@ class IndexCategoriesTest extends TestCase
         $response->assertOk();
         foreach ($categories as $category) {
             $response->assertJsonMissing([
-                'name' => $category->name
+                'name' => $category->name,
             ]);
         }
     }
-
 }

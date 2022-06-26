@@ -1,11 +1,10 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RecipeController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\IngredientController;
-use App\Http\Controllers\TestController;
+use App\Http\Controllers\RecipeController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +22,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 });
 
 // Recipes
-Route::get('/recipe', [ RecipeController::class, 'index'])->name('recipe.index');
+Route::get('/recipe', [RecipeController::class, 'index'])->name('recipe.index');
 Route::post('/recipe', [RecipeController::class, 'store'])->name('recipe.store');
 Route::get('/recipe/{recipe}', [RecipeController::class, 'show'])->name('recipe.show');
 Route::put('/recipe/{recipe}', [RecipeController::class, 'update'])->name('recipe.update');

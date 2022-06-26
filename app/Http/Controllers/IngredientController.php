@@ -6,7 +6,6 @@ use App\Http\Requests\StoreIngredientRequest;
 use App\Http\Requests\UpdateIngredientRequest;
 use App\Http\Resources\IngredientResource;
 use App\Models\Ingredient;
-use Illuminate\Http\Request;
 
 class IngredientController extends Controller
 {
@@ -19,6 +18,7 @@ class IngredientController extends Controller
     {
         $user = auth()->user();
         $ingredients = Ingredient::where('user_id', $user->id)->get();
+
         return IngredientResource::collection($ingredients);
     }
 
@@ -35,6 +35,7 @@ class IngredientController extends Controller
         $ingredient->name = $request->name;
         $ingredient->user_id = $user->id;
         $ingredient->save();
+
         return new IngredientResource($ingredient);
     }
 
@@ -50,6 +51,7 @@ class IngredientController extends Controller
         if ($ingredient->user->id !== $user->id) {
             abort(404, 'Cannot find ingredient');
         }
+
         return new IngredientResource($ingredient);
     }
 
@@ -72,6 +74,7 @@ class IngredientController extends Controller
         if ($ingredient->isDirty()) {
             $ingredient->save();
         }
+
         return new IngredientResource($ingredient);
     }
 
@@ -88,6 +91,7 @@ class IngredientController extends Controller
             abort(404, 'Cannot find ingredient');
         }
         $ingredient->delete();
+
         return response()->noContent();
     }
 }
