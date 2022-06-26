@@ -5,7 +5,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
-
 class UsersUUIDTest extends TestCase
 {
     use RefreshDatabase;
@@ -16,5 +15,4 @@ class UsersUUIDTest extends TestCase
         $user = User::factory()->create();
         $this->assertTrue(Str::isUuid($user->id));
     }
-
 }

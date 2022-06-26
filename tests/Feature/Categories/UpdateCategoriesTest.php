@@ -16,24 +16,24 @@ class UpdateCategoriesTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $category = Category::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $newName = 'new-category-name';
         $this->assertNotTrue($category->name === $newName);
 
         $response = $this->putJson(route('category.update', $category), [
-            'name' => $newName
+            'name' => $newName,
         ]);
 
         $response->assertOk();
         $response->assertJsonFragment([
-            'name' => $newName
+            'name' => $newName,
         ]);
         $category->refresh();
         $this->assertTrue($category->name === $newName);
         $this->assertDatabaseHas('categories', [
             'id' => $category->id,
-            'name' => $newName
+            'name' => $newName,
         ]);
     }
 
@@ -43,12 +43,12 @@ class UpdateCategoriesTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $category = Category::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $newName = 9999999;
 
         $response = $this->putJson(route('category.update', $category), [
-            'name' => $newName
+            'name' => $newName,
         ]);
 
         $response->assertJsonValidationErrors('name');
@@ -62,14 +62,14 @@ class UpdateCategoriesTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $categoryA = Category::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $categoryB = Category::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $response = $this->putJson(route('category.update', $categoryA), [
-            'name' => $categoryB->name
+            'name' => $categoryB->name,
         ]);
 
         $response->assertJsonValidationErrors('name');
@@ -86,13 +86,12 @@ class UpdateCategoriesTest extends TestCase
         ]);
 
         $response = $this->putJson(route('category.update', $category), [
-            'name' => 'some-new-name'
+            'name' => 'some-new-name',
         ]);
 
         $response->assertStatus(404);
         $this->assertDatabaseMissing('ingredients', [
-            'name' => 'some-new-name'
+            'name' => 'some-new-name',
         ]);
     }
-
 }

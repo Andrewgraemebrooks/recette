@@ -20,6 +20,7 @@ class RecipeController extends Controller
     {
         $user = auth()->user();
         $recipes = Recipe::where('user_id', $user->id)->get();
+
         return RecipeResource::collection($recipes);
     }
 
@@ -60,6 +61,7 @@ class RecipeController extends Controller
                 Storage::put($image->name, $image);
             }
         }
+
         return new RecipeResource($recipe);
     }
 
@@ -75,10 +77,11 @@ class RecipeController extends Controller
         if ($recipe->user->id !== $user->id) {
             abort(404, 'Cannot find recipe');
         }
+
         return new RecipeResource($recipe);
     }
 
-     /**
+    /**
      * Update the specified resource in storage.
      *
      * @param  \App\Http\Requests\UpdateRecipeRequest  $request
@@ -121,6 +124,7 @@ class RecipeController extends Controller
         if ($recipe->isDirty()) {
             $recipe->save();
         }
+
         return new RecipeResource($recipe);
     }
 
@@ -137,6 +141,7 @@ class RecipeController extends Controller
             abort(404, 'Cannot find recipe');
         }
         $recipe->delete();
+
         return response()->noContent();
     }
 }

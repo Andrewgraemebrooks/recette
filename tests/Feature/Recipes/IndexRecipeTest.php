@@ -17,13 +17,13 @@ class IndexRecipeTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $ingredient = Ingredient::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $recipes = Recipe::factory()
             ->count(2)
             ->hasAttached($ingredient, ['amount'=> 3])
             ->create([
-                'user_id' => $user->id
+                'user_id' => $user->id,
             ]);
 
         $response = $this->getJson(route('recipe.index'));
@@ -34,14 +34,14 @@ class IndexRecipeTest extends TestCase
             'ingredients' => [
                 [
                     'name' => $recipes[0]->ingredients[0]->name,
-                    'amount' => $recipes[0]->ingredients[0]->pivot->amount
+                    'amount' => $recipes[0]->ingredients[0]->pivot->amount,
                 ],
             ],
             'name' => $recipes[1]->name,
             'ingredients' => [
                 [
                     'name' => $recipes[1]->ingredients[0]->name,
-                    'amount' => $recipes[1]->ingredients[0]->pivot->amount
+                    'amount' => $recipes[1]->ingredients[0]->pivot->amount,
                 ],
             ],
         ]);
@@ -54,13 +54,13 @@ class IndexRecipeTest extends TestCase
         Sanctum::actingAs($user, ['*']);
         $someOtherUser = User::factory()->create();
         $ingredient = Ingredient::factory()->create([
-            'user_id' => $someOtherUser->id
+            'user_id' => $someOtherUser->id,
         ]);
         $recipes = Recipe::factory()
             ->count(2)
             ->hasAttached($ingredient, ['amount'=> 3])
             ->create([
-                'user_id' => $someOtherUser->id
+                'user_id' => $someOtherUser->id,
             ]);
 
         $response = $this->getJson(route('recipe.index'));
@@ -71,17 +71,16 @@ class IndexRecipeTest extends TestCase
             'ingredients' => [
                 [
                     'name' => $recipes[0]->ingredients[0]->name,
-                    'amount' => $recipes[0]->ingredients[0]->pivot->amount
+                    'amount' => $recipes[0]->ingredients[0]->pivot->amount,
                 ],
             ],
             'name' => $recipes[1]->name,
             'ingredients' => [
                 [
                     'name' => $recipes[1]->ingredients[0]->name,
-                    'amount' => $recipes[1]->ingredients[0]->pivot->amount
+                    'amount' => $recipes[1]->ingredients[0]->pivot->amount,
                 ],
             ],
         ]);
     }
-
 }

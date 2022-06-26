@@ -20,6 +20,7 @@ class RecipeIngredientResource extends JsonResource
                 $amount = $recipe->pivot->amount;
             }
         }
+
         return [
             'name' => $this->name,
             'amount' => $amount,

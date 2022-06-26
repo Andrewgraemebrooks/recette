@@ -16,24 +16,24 @@ class UpdateIngredientTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $ingredient = Ingredient::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $newName = 'new-ingredient-name';
         $this->assertNotTrue($ingredient->name === $newName);
 
         $response = $this->putJson(route('ingredient.update', $ingredient), [
-            'name' => $newName
+            'name' => $newName,
         ]);
 
         $response->assertOk();
         $response->assertJsonFragment([
-            'name' => $newName
+            'name' => $newName,
         ]);
         $ingredient->refresh();
         $this->assertTrue($ingredient->name === $newName);
         $this->assertDatabaseHas('ingredients', [
             'id' => $ingredient->id,
-            'name' => $newName
+            'name' => $newName,
         ]);
     }
 
@@ -43,12 +43,12 @@ class UpdateIngredientTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $ingredient = Ingredient::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $newName = 9999999;
 
         $response = $this->putJson(route('ingredient.update', $ingredient), [
-            'name' => $newName
+            'name' => $newName,
         ]);
 
         $response->assertJsonValidationErrors('name');
@@ -62,14 +62,14 @@ class UpdateIngredientTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $ingredientA = Ingredient::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $ingredientB = Ingredient::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $response = $this->putJson(route('ingredient.update', $ingredientA), [
-            'name' => $ingredientB->name
+            'name' => $ingredientB->name,
         ]);
 
         $response->assertJsonValidationErrors('name');
@@ -82,14 +82,14 @@ class UpdateIngredientTest extends TestCase
         Sanctum::actingAs($user, ['*']);
         $someOtherUser = User::factory()->create();
         $ingredientA = Ingredient::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $ingredientB = Ingredient::factory()->create([
             'user_id' => $someOtherUser->id,
         ]);
 
         $response = $this->putJson(route('ingredient.update', $ingredientA), [
-            'name' => $ingredientB->name
+            'name' => $ingredientB->name,
         ]);
 
         $response->assertOk();
@@ -108,12 +108,12 @@ class UpdateIngredientTest extends TestCase
         ]);
 
         $response = $this->putJson(route('ingredient.update', $ingredient), [
-            'name' => 'some-new-name'
+            'name' => 'some-new-name',
         ]);
 
         $response->assertStatus(404);
         $this->assertDatabaseMissing('ingredients', [
-            'name' => 'some-new-name'
+            'name' => 'some-new-name',
         ]);
     }
 
@@ -123,17 +123,15 @@ class UpdateIngredientTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $ingredient = Ingredient::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $originalIngredientName = $ingredient->name;
         $response = $this->putJson(route('ingredient.update', $ingredient), [
-            'name' => null
+            'name' => null,
         ]);
 
         $response->assertOk();
         $ingredient->refresh();
         $this->assertTrue($ingredient->name === $originalIngredientName);
     }
-
-
 }

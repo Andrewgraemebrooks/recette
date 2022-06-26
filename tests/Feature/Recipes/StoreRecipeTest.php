@@ -40,7 +40,7 @@ class StoreRecipeTest extends TestCase
         $ingredients = collect($recipe->ingredients)->map(function ($ingredient) {
             return [
                 'name' => $ingredient->name,
-                'amount' => $ingredient->pivot->amount
+                'amount' => $ingredient->pivot->amount,
             ];
         })->toArray();
         $this->assertEquals($recipe->name, $data['name']);
@@ -60,13 +60,13 @@ class StoreRecipeTest extends TestCase
             'ingredients' => [
                 [
                     'name' => $recipe->ingredients[0]->name,
-                    'amount' => $recipe->ingredients[0]->pivot->amount
+                    'amount' => $recipe->ingredients[0]->pivot->amount,
                 ],
                 [
                     'name' => $recipe->ingredients[1]->name,
-                    'amount' => $recipe->ingredients[1]->pivot->amount
+                    'amount' => $recipe->ingredients[1]->pivot->amount,
                 ],
-            ]
+            ],
         ]);
     }
 
@@ -94,10 +94,10 @@ class StoreRecipeTest extends TestCase
     public function a_recipe_name_must_be_unique()
     {
         $existingRecipe = Recipe::factory()->create([
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
         $data = $this->getRecipeData([
-            'name' => $existingRecipe->name
+            'name' => $existingRecipe->name,
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -109,11 +109,11 @@ class StoreRecipeTest extends TestCase
     {
         $someOtherUser = User::factory()->create();
         $existingRecipe = Recipe::factory()->create([
-            'user_id' => $someOtherUser->id
+            'user_id' => $someOtherUser->id,
         ]);
         $this->assertDatabaseCount('recipes', 1);
         $data = $this->getRecipeData([
-            'name' => $existingRecipe->name
+            'name' => $existingRecipe->name,
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -130,7 +130,7 @@ class StoreRecipeTest extends TestCase
             ['name' => 'some-other-ingredient', 'amount' => 4],
         ]);
         $data = $this->getRecipeData([
-            'ingredients' => $ingredientsAsString
+            'ingredients' => $ingredientsAsString,
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -142,13 +142,13 @@ class StoreRecipeTest extends TestCase
     public function if_the_ingredient_already_exists_a_new_ingredient_is_not_created()
     {
         $alreadyExistingIngredient = Ingredient::factory()->create([
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
         $this->assertDatabaseCount('ingredients', 1);
         $data = $this->getRecipeData([
             'ingredients' => [
-                ['name' => $alreadyExistingIngredient->name, 'amount' => 1]
-            ]
+                ['name' => $alreadyExistingIngredient->name, 'amount' => 1],
+            ],
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -162,13 +162,13 @@ class StoreRecipeTest extends TestCase
     {
         $someOtherUser = User::factory()->create();
         $alreadyExistingIngredient = Ingredient::factory()->create([
-            'user_id' => $someOtherUser->id
+            'user_id' => $someOtherUser->id,
         ]);
         $this->assertDatabaseCount('ingredients', 1);
         $data = $this->getRecipeData([
             'ingredients' => [
-                ['name' => $alreadyExistingIngredient->name, 'amount' => 1]
-            ]
+                ['name' => $alreadyExistingIngredient->name, 'amount' => 1],
+            ],
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -181,17 +181,17 @@ class StoreRecipeTest extends TestCase
     public function if_the_ingredient_already_exists_it_is_used_in_the_recipe()
     {
         $alreadyExistingIngredient = Ingredient::factory()->create([
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
         $someOtherUser = User::factory()->create();
         $otherUsersIngredientWithSameName = Ingredient::factory()->create([
             'user_id' => $someOtherUser->id,
-            'name' => $alreadyExistingIngredient->name
+            'name' => $alreadyExistingIngredient->name,
         ]);
         $data = $this->getRecipeData([
             'ingredients' => [
-                ['name' => $alreadyExistingIngredient->name, 'amount' => 1]
-            ]
+                ['name' => $alreadyExistingIngredient->name, 'amount' => 1],
+            ],
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -202,7 +202,6 @@ class StoreRecipeTest extends TestCase
 
         $response->assertCreated();
     }
-
 
     /** @test */
     public function a_name_must_be_a_string_for_recipe_creation()
@@ -220,13 +219,13 @@ class StoreRecipeTest extends TestCase
         Storage::fake('local');
         $data = $this->getRecipeData(['images' => [
             UploadedFile::fake()->image('imageOne.jpg'),
-            UploadedFile::fake()->image('imageTwo.jpg')
+            UploadedFile::fake()->image('imageTwo.jpg'),
         ]]);
 
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertCreated();
-        Storage::disk('local')->assertExists(['imageOne.jpg','imageTwo.jpg']);
+        Storage::disk('local')->assertExists(['imageOne.jpg', 'imageTwo.jpg']);
     }
 
     /** @test */
@@ -243,7 +242,7 @@ class StoreRecipeTest extends TestCase
     public function a_recipe_can_have_a_rating()
     {
         $data = $this->getRecipeData([
-            'rating' => 0
+            'rating' => 0,
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -252,7 +251,7 @@ class StoreRecipeTest extends TestCase
         $recipe = Recipe::first();
         $this->assertDatabaseHas('recipes', [
             'id' => $recipe->id,
-            'rating' => 0
+            'rating' => 0,
         ]);
     }
 
@@ -260,7 +259,7 @@ class StoreRecipeTest extends TestCase
     public function a_recipe_can_be_a_string_but_must_be_a_valid_number()
     {
         $data = $this->getRecipeData([
-            'rating' => '5'
+            'rating' => '5',
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -269,7 +268,7 @@ class StoreRecipeTest extends TestCase
         $recipe = Recipe::first();
         $this->assertDatabaseHas('recipes', [
             'id' => $recipe->id,
-            'rating' => 5
+            'rating' => 5,
         ]);
     }
 
@@ -277,7 +276,7 @@ class StoreRecipeTest extends TestCase
     public function a_recipe_rating_must_be_a_valid_number()
     {
         $data = $this->getRecipeData([
-            'rating' => 'not-a-number'
+            'rating' => 'not-a-number',
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -289,7 +288,7 @@ class StoreRecipeTest extends TestCase
     public function a_recipe_rating_must_be_zero_or_greater()
     {
         $data = $this->getRecipeData([
-            'rating' => -1
+            'rating' => -1,
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -301,7 +300,7 @@ class StoreRecipeTest extends TestCase
     public function a_recipe_rating_must_be_five_or_less()
     {
         $data = $this->getRecipeData([
-            'rating' => 6
+            'rating' => 6,
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -344,6 +343,6 @@ class StoreRecipeTest extends TestCase
             'ingredients' => [
                 ['name' => 'some-ingredient', 'amount' => 1],
                 ['name' => 'some-other-ingredient', 'amount' => 4],
-        ]], $merge);
+            ], ], $merge);
     }
 }

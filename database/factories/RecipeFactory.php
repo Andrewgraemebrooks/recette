@@ -24,7 +24,7 @@ class RecipeFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
-            'user_id' => User::factory()->create()->id
+            'user_id' => User::factory()->create()->id,
         ];
     }
 }

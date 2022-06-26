@@ -16,14 +16,14 @@ class DeleteIngredientsTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $ingredient = Ingredient::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $response = $this->deleteJson(route('ingredient.destroy', $ingredient));
 
         $response->assertNoContent();
         $this->assertDatabaseMissing('ingredients', [
-            'id' => $ingredient->id
+            'id' => $ingredient->id,
         ]);
     }
 
@@ -34,14 +34,14 @@ class DeleteIngredientsTest extends TestCase
         Sanctum::actingAs($user, ['*']);
         $someOtherUser = User::factory()->create();
         $ingredient = Ingredient::factory()->create([
-            'user_id' => $someOtherUser->id
+            'user_id' => $someOtherUser->id,
         ]);
 
         $response = $this->deleteJson(route('ingredient.destroy', $ingredient));
 
         $response->assertStatus(404);
         $this->assertDatabaseHas('ingredients', [
-            'id' => $ingredient->id
+            'id' => $ingredient->id,
         ]);
     }
 }

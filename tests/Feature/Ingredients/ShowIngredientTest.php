@@ -16,14 +16,14 @@ class ShowIngredientTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $ingredient = Ingredient::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $response = $this->getJson(route('ingredient.show', $ingredient));
 
         $response->assertOk();
         $response->assertJsonFragment([
-            'name' => $ingredient->name
+            'name' => $ingredient->name,
         ]);
     }
 
@@ -34,15 +34,14 @@ class ShowIngredientTest extends TestCase
         Sanctum::actingAs($user, ['*']);
         $someOtherUser = User::factory()->create();
         $ingredient = Ingredient::factory()->create([
-            'user_id' => $someOtherUser->id
+            'user_id' => $someOtherUser->id,
         ]);
 
         $response = $this->getJson(route('ingredient.show', $ingredient));
 
         $response->assertStatus(404);
         $response->assertJsonMissing([
-            'name' => $ingredient->name
+            'name' => $ingredient->name,
         ]);
     }
-
 }
