@@ -31,10 +31,10 @@ class StoreIngredientsTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $existingIngredient = Ingredient::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $data = $this->getIngredientData([
-            'name' => $existingIngredient->name
+            'name' => $existingIngredient->name,
         ]);
 
         $response = $this->postJson(route('ingredient.store'), $data);
@@ -49,10 +49,10 @@ class StoreIngredientsTest extends TestCase
         Sanctum::actingAs($user, ['*']);
         $someOtherUser = User::factory()->create();
         $existingIngredient = Ingredient::factory()->create([
-            'user_id' => $someOtherUser->id
+            'user_id' => $someOtherUser->id,
         ]);
         $data = $this->getIngredientData([
-            'name' => $existingIngredient->name
+            'name' => $existingIngredient->name,
         ]);
 
         $response = $this->postJson(route('ingredient.store'), $data);
@@ -62,14 +62,13 @@ class StoreIngredientsTest extends TestCase
         $this->assertTrue($ingredientsWithTheName->count() === 2);
     }
 
-
     /** @test */
     public function a_ingredient_name_must_be_a_string()
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $data = $this->getIngredientData([
-            'name' => 99999999
+            'name' => 99999999,
         ]);
 
         $response = $this->postJson(route('ingredient.store'), $data);
@@ -80,7 +79,7 @@ class StoreIngredientsTest extends TestCase
     protected function getIngredientData($merge = []): array
     {
         return array_merge([
-            'name' => 'some-ingredient'
+            'name' => 'some-ingredient',
         ], $merge);
     }
 }

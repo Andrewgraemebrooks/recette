@@ -1,8 +1,6 @@
 <?php
 
 use App\Models\Category;
-use App\Models\Ingredient;
-use App\Models\Recipe;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -16,7 +14,7 @@ class CategoryModelRelationsTest extends TestCase
     {
         $user = User::factory()->create();
         $category = Category::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $this->assertNotNull($category->user);
         $this->assertEquals($user->id, $category->user->id);

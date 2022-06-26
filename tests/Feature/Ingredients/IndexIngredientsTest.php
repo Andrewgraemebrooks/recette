@@ -16,7 +16,7 @@ class IndexIngredientsTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $ingredients = Ingredient::factory()->count(3)->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $response = $this->getJson(route('ingredient.index'));
@@ -24,10 +24,10 @@ class IndexIngredientsTest extends TestCase
         $response->assertOk();
         foreach ($ingredients as $ingredient) {
             $response->assertJsonFragment([
-                'name' => $ingredient->name
+                'name' => $ingredient->name,
             ]);
             $response->assertJsonMissing([
-                'amount' => null
+                'amount' => null,
             ]);
         }
     }
@@ -39,7 +39,7 @@ class IndexIngredientsTest extends TestCase
         Sanctum::actingAs($user, ['*']);
         $someOtherUser = User::factory()->create();
         $ingredients = Ingredient::factory()->count(3)->create([
-            'user_id' => $someOtherUser->id
+            'user_id' => $someOtherUser->id,
         ]);
 
         $response = $this->getJson(route('ingredient.index'));
@@ -47,9 +47,8 @@ class IndexIngredientsTest extends TestCase
         $response->assertOk();
         foreach ($ingredients as $ingredient) {
             $response->assertJsonMissing([
-                'name' => $ingredient->name
+                'name' => $ingredient->name,
             ]);
         }
     }
-
 }

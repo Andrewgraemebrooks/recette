@@ -31,7 +31,7 @@ class StoreCategoriesTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $data = $this->getCategoryData([
-            'name' => 'same-category-name'
+            'name' => 'same-category-name',
         ]);
 
         $this->postJson(route('category.store'), $data);
@@ -43,7 +43,7 @@ class StoreCategoriesTest extends TestCase
     protected function getCategoryData($merge = []): array
     {
         return array_merge([
-            'name' => 'some-category'
+            'name' => 'some-category',
         ], $merge);
     }
 }

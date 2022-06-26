@@ -15,7 +15,7 @@ class UserModelRelationsTest extends TestCase
     {
         $user = User::factory()->create();
         Recipe::factory()->count(2)->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $this->assertNotNull($user->recipes);
         $this->assertCount(2, $user->recipes);
@@ -26,7 +26,7 @@ class UserModelRelationsTest extends TestCase
     {
         $user = User::factory()->create();
         Ingredient::factory()->count(2)->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
         $this->assertNotNull($user->ingredients);
         $this->assertCount(2, $user->ingredients);

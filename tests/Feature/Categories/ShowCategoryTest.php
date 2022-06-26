@@ -16,14 +16,14 @@ class ShowCategoryTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $category = Category::factory()->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $response = $this->getJson(route('category.show', $category));
 
         $response->assertOk();
         $response->assertJsonFragment([
-            'name' => $category->name
+            'name' => $category->name,
         ]);
     }
 
@@ -34,12 +34,11 @@ class ShowCategoryTest extends TestCase
         Sanctum::actingAs($user, ['*']);
         $someOtherUser = User::factory()->create();
         $category = Category::factory()->create([
-            'user_id' => $someOtherUser->id
+            'user_id' => $someOtherUser->id,
         ]);
 
         $response = $this->getJson(route('category.show', $category));
 
         $response->assertStatus(404);
     }
-
 }

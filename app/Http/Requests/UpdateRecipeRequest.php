@@ -26,7 +26,7 @@ class UpdateRecipeRequest extends FormRequest
         return [
             'name' => 'nullable|unique:recipes|string',
             'ingredients' => 'nullable|array',
-            'rating' => 'integer|between:0,5'
+            'rating' => 'integer|between:0,5',
         ];
     }
 }
