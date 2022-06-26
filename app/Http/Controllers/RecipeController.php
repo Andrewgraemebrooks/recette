@@ -121,6 +121,9 @@ class RecipeController extends Controller
         if ($request->rating) {
             $recipe->rating = $request->rating;
         }
+        if ($request->category_id) {
+            $recipe->category_id = $request->category_id;
+        }
         if ($recipe->isDirty()) {
             $recipe->save();
         }

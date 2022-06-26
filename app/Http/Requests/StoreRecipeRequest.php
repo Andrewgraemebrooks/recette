@@ -29,6 +29,9 @@ class StoreRecipeRequest extends FormRequest
             'name' => [Rule::unique('recipes')->where(fn ($query) => $query->where('user_id', Auth::user()->id)), 'required', 'string'],
             'ingredients' => 'required|array',
             'rating' => 'integer|between:0,5',
+            'category_id' => [Rule::exists('categories')->where(function ($query) {
+                $query->where('user_id', Auth::user()->id);
+            })],
         ];
     }
 }

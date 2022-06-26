@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Category;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use App\Models\User;
@@ -312,5 +313,38 @@ class UpdateRecipeTest extends TestCase
         ]);
 
         $response->assertJsonValidationErrors('rating');
+    }
+
+    /** @test */
+    public function a_recipes_category_can_be_updated()
+    {
+        $newCategory = Category::factory()->create([
+            'user_id' => $this->user->id,
+        ]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), [
+            'category_id' => $newCategory->id,
+        ]);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('recipes', [
+            'id' => $this->recipe->id,
+            'category_id' => $newCategory->id,
+        ]);
+    }
+
+    /** @test */
+    public function the_recipes_category_must_belong_to_the_user()
+    {
+        $someOtherUser = User::factory()->create();
+        $newCategory = Category::factory()->create([
+            'user_id' => $someOtherUser->id,
+        ]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), [
+            'category_id' => $newCategory->id,
+        ]);
+
+        $response->assertJsonValidationErrors('category_id');
     }
 }

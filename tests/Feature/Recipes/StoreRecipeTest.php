@@ -312,10 +312,10 @@ class StoreRecipeTest extends TestCase
     public function a_recipe_can_be_assigned_to_a_category()
     {
         $category = Category::factory()->create([
-            'user_id' => $this->user->id
+            'user_id' => $this->user->id,
         ]);
         $data = $this->getRecipeData([
-            'category_id' => $category->id
+            'category_id' => $category->id,
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
@@ -324,17 +324,25 @@ class StoreRecipeTest extends TestCase
         $recipe = Recipe::first();
         $this->assertDatabaseHas('recipes', [
             'id' => $recipe->id,
-            'category_id' => $category->id
+            'category_id' => $category->id,
         ]);
     }
 
     /** @test */
-    public function a_recipe_cannot_be_assigned_to_more_than_one_categories()
+    public function the_recipes_category_must_belong_to_the_user()
     {
-        $this->assertTrue(false);
+        $someOtherUser = User::factory()->create();
+        $category = Category::factory()->create([
+            'user_id' => $someOtherUser->id,
+        ]);
+        $data = $this->getRecipeData([
+            'category_id' => $category->id,
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertJsonValidationErrors('category_id');
     }
-
-
 
     protected function getRecipeData($merge = []): array
     {
