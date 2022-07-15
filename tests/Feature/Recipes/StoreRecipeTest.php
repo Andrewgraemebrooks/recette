@@ -344,6 +344,13 @@ class StoreRecipeTest extends TestCase
         $response->assertJsonValidationErrors('category_id');
     }
 
+    /** @test */
+    public function the_recipes_category_must_exist()
+    {
+        $this->assertTrue(false);
+    }
+
+
     protected function getRecipeData($merge = []): array
     {
         return array_merge([

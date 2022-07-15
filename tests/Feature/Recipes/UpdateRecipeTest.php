@@ -101,6 +101,12 @@ class UpdateRecipeTest extends TestCase
     }
 
     /** @test */
+    public function a_recipe_name_is_only_unique_to_this_users_recipes()
+    {
+        $this->assertTrue(false);
+    }
+
+    /** @test */
     public function the_name_can_be_null_on_an_update()
     {
         $originalRecipeName = $this->recipe->name;
@@ -116,7 +122,6 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function a_recipes_ingredients_can_be_updated()
     {
-        $this->withoutExceptionHandling();
         $newIngredients = [
             ['name' => 'updated-ingredient', 'amount' => 1],
             ['name' => 'some-other-updated-ingredient', 'amount' => 4],
@@ -229,7 +234,6 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function an_array_of_images_can_be_used_with_a_recipe_update()
     {
-        $this->withoutExceptionHandling();
         Storage::fake('local');
         $data = ['images' => [
             UploadedFile::fake()->image('imageOne.jpg'),
@@ -332,6 +336,13 @@ class UpdateRecipeTest extends TestCase
             'category_id' => $newCategory->id,
         ]);
     }
+
+    /** @test */
+    public function the_recipes_category_must_exist()
+    {
+        $this->assertTrue(false);
+    }
+
 
     /** @test */
     public function the_recipes_category_must_belong_to_the_user()
