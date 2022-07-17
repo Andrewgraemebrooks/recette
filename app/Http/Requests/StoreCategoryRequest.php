@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class StoreCategoryRequest extends FormRequest
 {
@@ -24,7 +26,11 @@ class StoreCategoryRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'unique:categories,name',
+            'name' => [
+                Rule::unique('categories', 'name')->where(fn ($query) => $query->where('user_id', Auth::user()->id)),
+                'required',
+                'string',
+            ],
         ];
     }
 }

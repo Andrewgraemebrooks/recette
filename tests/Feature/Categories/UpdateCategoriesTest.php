@@ -76,6 +76,28 @@ class UpdateCategoriesTest extends TestCase
     }
 
     /** @test */
+    public function a_categorys_name_is_only_unique_to_this_users_categories()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+        $differentUser = User::factory()->create();
+        $categoryA = Category::factory()->create([
+            'user_id' => $user->id,
+        ]);
+        $categoryB = Category::factory()->create([
+            'user_id' => $differentUser->id,
+        ]);
+
+        $response = $this->putJson(route('category.update', $categoryA), [
+            'name' => $categoryB->name,
+        ]);
+
+        $response->assertOk();
+        $categoryA->refresh();
+        $this->assertEquals($categoryB->name, $categoryA->name);
+    }
+
+    /** @test */
     public function a_user_cannot_update_another_users_category()
     {
         $user = User::factory()->create();

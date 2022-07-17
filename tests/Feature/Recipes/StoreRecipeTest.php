@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -305,6 +307,68 @@ class StoreRecipeTest extends TestCase
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertJsonValidationErrors('rating');
+    }
+
+    /** @test */
+    public function a_recipe_can_be_assigned_to_a_category()
+    {
+        $category = Category::factory()->create([
+            'user_id' => $this->user->id,
+        ]);
+        $data = $this->getRecipeData([
+            'category_id' => $category->id,
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertCreated();
+        $recipe = Recipe::first();
+        $this->assertDatabaseHas('recipes', [
+            'id' => $recipe->id,
+            'category_id' => $category->id,
+        ]);
+    }
+
+    /** @test */
+    public function the_recipes_category_must_belong_to_the_user()
+    {
+        $someOtherUser = User::factory()->create();
+        $category = Category::factory()->create([
+            'user_id' => $someOtherUser->id,
+        ]);
+        $data = $this->getRecipeData([
+            'category_id' => $category->id,
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+        $response->assertJsonValidationErrors('category_id');
+        $response->assertJsonFragment([
+            'errors' => [
+                'category_id' => [
+                    'The selected category id is invalid.',
+                ],
+            ],
+        ]);
+    }
+
+    /** @test */
+    public function the_recipes_category_must_exist()
+    {
+        $randomId = Str::uuid();
+        $data = $this->getRecipeData([
+            'category_id' => $randomId,
+        ]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertJsonValidationErrors('category_id');
+        $response->assertJsonFragment([
+            'errors' => [
+                'category_id' => [
+                    'The selected category id is invalid.',
+                ],
+            ],
+        ]);
     }
 
     protected function getRecipeData($merge = []): array

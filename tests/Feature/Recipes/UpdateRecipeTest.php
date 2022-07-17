@@ -1,11 +1,13 @@
 <?php
 
+use App\Models\Category;
 use App\Models\Ingredient;
 use App\Models\Recipe;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -100,22 +102,24 @@ class UpdateRecipeTest extends TestCase
     }
 
     /** @test */
-    public function the_name_can_be_null_on_an_update()
+    public function a_recipe_name_is_only_unique_to_this_users_recipes()
     {
-        $originalRecipeName = $this->recipe->name;
+        $differentUser = User::factory()->create();
+        $recipe = Recipe::factory()->create([
+            'user_id' => $differentUser->id,
+        ]);
+
         $response = $this->putJson(route('recipe.update', $this->recipe), [
-            'name' => null,
+            'name' => $recipe->name,
         ]);
 
         $response->assertOk();
-        $this->recipe->refresh();
-        $this->assertTrue($this->recipe->name === $originalRecipeName);
+        $this->assertCount(2, Recipe::where('name', $recipe->name)->get());
     }
 
     /** @test */
     public function a_recipes_ingredients_can_be_updated()
     {
-        $this->withoutExceptionHandling();
         $newIngredients = [
             ['name' => 'updated-ingredient', 'amount' => 1],
             ['name' => 'some-other-updated-ingredient', 'amount' => 4],
@@ -193,25 +197,6 @@ class UpdateRecipeTest extends TestCase
     }
 
     /** @test */
-    public function the_ingredients_can_be_null()
-    {
-        $originalRecipeIngredients = collect($this->recipe->ingredients)->map(function ($ingredient) {
-            return [
-                'name' => $ingredient->name,
-                'amount' => $ingredient->pivot->amount,
-            ];
-        })->toArray();
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
-            'ingredients' => null,
-        ]);
-
-        $response->assertOk();
-        $responseIngredients = $response->json('data')['ingredients'];
-        $this->recipe->refresh();
-        $this->assertEqualsCanonicalizing($originalRecipeIngredients, $responseIngredients);
-    }
-
-    /** @test */
     public function the_ingredients_must_be_an_array()
     {
         $newIngredientsAsString = json_encode([
@@ -228,7 +213,6 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function an_array_of_images_can_be_used_with_a_recipe_update()
     {
-        $this->withoutExceptionHandling();
         Storage::fake('local');
         $data = ['images' => [
             UploadedFile::fake()->image('imageOne.jpg'),
@@ -312,5 +296,57 @@ class UpdateRecipeTest extends TestCase
         ]);
 
         $response->assertJsonValidationErrors('rating');
+    }
+
+    /** @test */
+    public function a_recipes_category_can_be_updated()
+    {
+        $newCategory = Category::factory()->create([
+            'user_id' => $this->user->id,
+        ]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), [
+            'category_id' => $newCategory->id,
+        ]);
+
+        $response->assertOk();
+        $this->assertDatabaseHas('recipes', [
+            'id' => $this->recipe->id,
+            'category_id' => $newCategory->id,
+        ]);
+    }
+
+    /** @test */
+    public function the_recipes_category_must_exist()
+    {
+        $randomId = Str::uuid();
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), [
+            'category_id' => $randomId,
+        ]);
+
+        $response->assertJsonValidationErrors('category_id');
+        $response->assertJsonFragment([
+            'errors' => [
+                'category_id' => [
+                    'The selected category id is invalid.',
+                ],
+            ],
+        ]);
+    }
+
+    /** @test */
+    public function the_recipes_category_must_belong_to_the_user()
+    {
+        $someOtherUser = User::factory()->create();
+        $newCategory = Category::factory()->create([
+            'user_id' => $someOtherUser->id,
+        ]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), [
+            'category_id' => $newCategory->id,
+        ]);
+
+        $response->assertJsonValidationErrors('category_id');
     }
 }

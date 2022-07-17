@@ -38,6 +38,9 @@ class RecipeController extends Controller
         if ($request->rating || $request->rating === 0) {
             $recipe->rating = $request->rating;
         }
+        if ($request->category_id) {
+            $recipe->category_id = $request->category_id;
+        }
         $recipe->user_id = $user->id;
         $recipe->save();
         foreach ($request->ingredients as $ingredient) {
@@ -117,6 +120,9 @@ class RecipeController extends Controller
         }
         if ($request->rating) {
             $recipe->rating = $request->rating;
+        }
+        if ($request->category_id) {
+            $recipe->category_id = $request->category_id;
         }
         if ($recipe->isDirty()) {
             $recipe->save();
