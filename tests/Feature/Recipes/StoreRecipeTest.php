@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -340,16 +341,35 @@ class StoreRecipeTest extends TestCase
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
-
         $response->assertJsonValidationErrors('category_id');
+        $response->assertJsonFragment([
+            'errors' => [
+                'category_id' => [
+                    'The selected category id is invalid.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
     public function the_recipes_category_must_exist()
     {
-        $this->assertTrue(false);
-    }
+        $randomId = Str::uuid();
+        $data = $this->getRecipeData([
+            'category_id' => $randomId,
+        ]);
 
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertJsonValidationErrors('category_id');
+        $response->assertJsonFragment([
+            'errors' => [
+                'category_id' => [
+                    'The selected category id is invalid.',
+                ],
+            ],
+        ]);
+    }
 
     protected function getRecipeData($merge = []): array
     {

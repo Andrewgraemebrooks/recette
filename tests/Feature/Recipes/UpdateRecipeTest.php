@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -103,20 +104,17 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function a_recipe_name_is_only_unique_to_this_users_recipes()
     {
-        $this->assertTrue(false);
-    }
+        $differentUser = User::factory()->create();
+        $recipe = Recipe::factory()->create([
+            'user_id' => $differentUser->id,
+        ]);
 
-    /** @test */
-    public function the_name_can_be_null_on_an_update()
-    {
-        $originalRecipeName = $this->recipe->name;
         $response = $this->putJson(route('recipe.update', $this->recipe), [
-            'name' => null,
+            'name' => $recipe->name,
         ]);
 
         $response->assertOk();
-        $this->recipe->refresh();
-        $this->assertTrue($this->recipe->name === $originalRecipeName);
+        $this->assertCount(2, Recipe::where('name', $recipe->name)->get());
     }
 
     /** @test */
@@ -196,25 +194,6 @@ class UpdateRecipeTest extends TestCase
         $this->assertNotTrue($recipeIngredients->contains($otherUsersIngredientWithSameName));
 
         $response->assertOk();
-    }
-
-    /** @test */
-    public function the_ingredients_can_be_null()
-    {
-        $originalRecipeIngredients = collect($this->recipe->ingredients)->map(function ($ingredient) {
-            return [
-                'name' => $ingredient->name,
-                'amount' => $ingredient->pivot->amount,
-            ];
-        })->toArray();
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
-            'ingredients' => null,
-        ]);
-
-        $response->assertOk();
-        $responseIngredients = $response->json('data')['ingredients'];
-        $this->recipe->refresh();
-        $this->assertEqualsCanonicalizing($originalRecipeIngredients, $responseIngredients);
     }
 
     /** @test */
@@ -340,9 +319,21 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function the_recipes_category_must_exist()
     {
-        $this->assertTrue(false);
-    }
+        $randomId = Str::uuid();
 
+        $response = $this->putJson(route('recipe.update', $this->recipe), [
+            'category_id' => $randomId,
+        ]);
+
+        $response->assertJsonValidationErrors('category_id');
+        $response->assertJsonFragment([
+            'errors' => [
+                'category_id' => [
+                    'The selected category id is invalid.',
+                ],
+            ],
+        ]);
+    }
 
     /** @test */
     public function the_recipes_category_must_belong_to_the_user()

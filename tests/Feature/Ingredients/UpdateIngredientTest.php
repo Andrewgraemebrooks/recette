@@ -116,22 +116,4 @@ class UpdateIngredientTest extends TestCase
             'name' => 'some-new-name',
         ]);
     }
-
-    /** @test */
-    public function the_name_can_be_null_on_an_update()
-    {
-        $user = User::factory()->create();
-        Sanctum::actingAs($user, ['*']);
-        $ingredient = Ingredient::factory()->create([
-            'user_id' => $user->id,
-        ]);
-        $originalIngredientName = $ingredient->name;
-        $response = $this->putJson(route('ingredient.update', $ingredient), [
-            'name' => null,
-        ]);
-
-        $response->assertOk();
-        $ingredient->refresh();
-        $this->assertTrue($ingredient->name === $originalIngredientName);
-    }
 }
