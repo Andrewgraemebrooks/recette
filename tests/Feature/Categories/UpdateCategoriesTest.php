@@ -52,6 +52,13 @@ class UpdateCategoriesTest extends TestCase
         ]);
 
         $response->assertJsonValidationErrors('name');
+        $response->assertJsonFragment([
+            'errors' => [
+                'name' => [
+                    'The name must be a string.',
+                ],
+            ],
+        ]);
         $category->refresh();
         $this->assertNotTrue($category->name === $newName);
     }
@@ -73,6 +80,13 @@ class UpdateCategoriesTest extends TestCase
         ]);
 
         $response->assertJsonValidationErrors('name');
+        $response->assertJsonFragment([
+            'errors' => [
+                'name' => [
+                    'The name has already been taken.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */

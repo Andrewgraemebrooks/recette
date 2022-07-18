@@ -68,12 +68,8 @@ class CategoryController extends Controller
         if ($category->user->id !== $user->id) {
             abort(404, 'Cannot find category');
         }
-        if ($request->name) {
-            $category->name = $request->name;
-        }
-        if ($category->isDirty()) {
-            $category->save();
-        }
+        $category->name = $request->name;
+        $category->save();
 
         return new CategoryResource($category);
     }

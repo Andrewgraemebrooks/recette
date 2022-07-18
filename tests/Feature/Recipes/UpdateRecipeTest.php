@@ -39,9 +39,10 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function a_user_can_update_their_recipe()
     {
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'name' => 'new-ingredient-name',
         ]);
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertOk();
         $this->recipe->refresh();
@@ -55,10 +56,11 @@ class UpdateRecipeTest extends TestCase
         $someOtherUsersRecipe = Recipe::factory()->create([
             'user_id' => $someOtherUser->id,
         ]);
-
-        $response = $this->putJson(route('recipe.update', $someOtherUsersRecipe), [
+        $data = $this->getRecipeData([
             'name' => 'new-ingredient-name',
         ]);
+
+        $response = $this->putJson(route('recipe.update', $someOtherUsersRecipe), $data);
 
         $response->assertStatus(404);
         $this->recipe->refresh();
@@ -68,9 +70,10 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function a_recipe_name_can_be_updated()
     {
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'name' => 'new-ingredient-name',
         ]);
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertOk();
         $this->recipe->refresh();
@@ -80,11 +83,19 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function the_name_must_be_a_string_for_recipe_update()
     {
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'name' => 999999,
         ]);
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertJsonValidationErrors('name');
+        $response->assertJsonFragment([
+            'errors' => [
+                'name' => [
+                    'The name must be a string.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -93,12 +104,20 @@ class UpdateRecipeTest extends TestCase
         $differentRecipe = Recipe::factory()->create([
             'user_id' => $this->user->id,
         ]);
-
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'name' => $differentRecipe->name,
         ]);
 
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
+
         $response->assertJsonValidationErrors('name');
+        $response->assertJsonFragment([
+            'errors' => [
+                'name' => [
+                    'The name has already been taken.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -108,10 +127,11 @@ class UpdateRecipeTest extends TestCase
         $recipe = Recipe::factory()->create([
             'user_id' => $differentUser->id,
         ]);
-
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'name' => $recipe->name,
         ]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertOk();
         $this->assertCount(2, Recipe::where('name', $recipe->name)->get());
@@ -124,10 +144,11 @@ class UpdateRecipeTest extends TestCase
             ['name' => 'updated-ingredient', 'amount' => 1],
             ['name' => 'some-other-updated-ingredient', 'amount' => 4],
         ];
-
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'ingredients' => $newIngredients,
         ]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertOk();
         $responseIngredients = $response->json('data')['ingredients'];
@@ -142,12 +163,13 @@ class UpdateRecipeTest extends TestCase
             'user_id' => $this->user->id,
         ]);
         $existingIngredientCount = Ingredient::all()->count();
-
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'ingredients' => [
                 ['name' => $alreadyExistingIngredient->name, 'amount' => 1],
             ],
         ]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertOk();
         $this->assertDatabaseCount('ingredients', $existingIngredientCount);
@@ -161,12 +183,13 @@ class UpdateRecipeTest extends TestCase
             'user_id' => $someOtherUser->id,
         ]);
         $existingIngredientCount = Ingredient::all()->count();
-
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'ingredients' => [
                 ['name' => $alreadyExistingIngredient->name, 'amount' => 1],
             ],
         ]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertOk();
         $this->assertDatabaseCount('ingredients', $existingIngredientCount + 1);
@@ -183,11 +206,13 @@ class UpdateRecipeTest extends TestCase
             'user_id' => $someOtherUser->id,
             'name' => $alreadyExistingIngredient->name,
         ]);
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'ingredients' => [
                 ['name' => $alreadyExistingIngredient->name, 'amount' => 1],
             ],
         ]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $recipeIngredients = $this->recipe->ingredients;
         $this->assertTrue($recipeIngredients->contains($alreadyExistingIngredient));
@@ -203,21 +228,29 @@ class UpdateRecipeTest extends TestCase
             ['name' => 'some-ingredient', 'amount' => 1],
             ['name' => 'some-other-ingredient', 'amount' => 4],
         ]);
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'ingredients' => $newIngredientsAsString,
         ]);
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertJsonValidationErrors('ingredients');
+        $response->assertJsonFragment([
+            'errors' => [
+                'ingredients' => [
+                    'The ingredients must be an array.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
     public function an_array_of_images_can_be_used_with_a_recipe_update()
     {
         Storage::fake('local');
-        $data = ['images' => [
+        $data = $this->getRecipeData(['images' => [
             UploadedFile::fake()->image('imageOne.jpg'),
             UploadedFile::fake()->image('imageTwo.jpg'),
-        ]];
+        ]]);
 
         $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
@@ -228,7 +261,7 @@ class UpdateRecipeTest extends TestCase
     /** @test */
     public function can_update_a_recipe_without_images()
     {
-        $data = ['images' => null];
+        $data = $this->getRecipeData(['images' => null]);
 
         $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
@@ -236,66 +269,95 @@ class UpdateRecipeTest extends TestCase
     }
 
     /** @test */
+    public function if_images_are_not_null_they_must_be_an_array()
+    {
+        $data = $this->getRecipeData(['images' => 999999999]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
+
+        $response->assertJsonValidationErrors('images');
+        $response->assertJsonFragment([
+            'errors' => [
+                'images' => [
+                    'The images must be an array.',
+                ],
+            ],
+        ]);
+    }
+
+    /** @test */
     public function a_recipe_can_be_updated_with_a_rating()
     {
-        $newRating = 3;
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
-            'rating' => $newRating,
-        ]);
+        $data = $this->getRecipeData(['rating' => 3]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertOk();
         $recipe = Recipe::first();
-        $this->assertEquals($newRating, $recipe->rating);
+        $this->assertEquals(3, $recipe->rating);
     }
 
     /** @test */
     public function a_recipe_can_be_a_string_but_must_be_a_valid_number()
     {
-        $newRating = '5';
+        $data = $this->getRecipeData(['rating' => '5']);
 
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
-            'rating' => $newRating,
-        ]);
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertOk();
         $recipe = Recipe::first();
-        $this->assertEquals($newRating, $recipe->rating);
+        $this->assertEquals(5, $recipe->rating);
     }
 
     /** @test */
     public function a_recipe_rating_must_be_a_valid_number()
     {
-        $newRating = 'not-a-number';
+        $data = $this->getRecipeData(['rating' => false]);
 
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
-            'rating' => $newRating,
-        ]);
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertJsonValidationErrors('rating');
+        $response->assertJsonFragment([
+            'errors' => [
+                'rating' => [
+                    'The rating must be an integer.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
     public function a_recipe_rating_must_be_zero_or_greater()
     {
-        $newRating = -1;
+        $data = $this->getRecipeData(['rating' => -1]);
 
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
-            'rating' => $newRating,
-        ]);
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertJsonValidationErrors('rating');
+        $response->assertJsonFragment([
+            'errors' => [
+                'rating' => [
+                    'The rating must be between 0 and 5.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
     public function a_recipe_rating_must_be_five_or_less()
     {
-        $newRating = 6;
+        $data = $this->getRecipeData(['rating' => 6]);
 
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
-            'rating' => $newRating,
-        ]);
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertJsonValidationErrors('rating');
+        $response->assertJsonFragment([
+            'errors' => [
+                'rating' => [
+                    'The rating must be between 0 and 5.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -304,10 +366,11 @@ class UpdateRecipeTest extends TestCase
         $newCategory = Category::factory()->create([
             'user_id' => $this->user->id,
         ]);
-
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'category_id' => $newCategory->id,
         ]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertOk();
         $this->assertDatabaseHas('recipes', [
@@ -320,10 +383,11 @@ class UpdateRecipeTest extends TestCase
     public function the_recipes_category_must_exist()
     {
         $randomId = Str::uuid();
-
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'category_id' => $randomId,
         ]);
+
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertJsonValidationErrors('category_id');
         $response->assertJsonFragment([
@@ -342,11 +406,29 @@ class UpdateRecipeTest extends TestCase
         $newCategory = Category::factory()->create([
             'user_id' => $someOtherUser->id,
         ]);
-
-        $response = $this->putJson(route('recipe.update', $this->recipe), [
+        $data = $this->getRecipeData([
             'category_id' => $newCategory->id,
         ]);
 
+        $response = $this->putJson(route('recipe.update', $this->recipe), $data);
+
         $response->assertJsonValidationErrors('category_id');
+        $response->assertJsonFragment([
+            'errors' => [
+                'category_id' => [
+                    'The selected category id is invalid.',
+                ],
+            ],
+        ]);
+    }
+
+    protected function getRecipeData($merge = []): array
+    {
+        return array_merge([
+            'name' => 'some-recipe-name',
+            'ingredients' => [
+                ['name' => 'some-ingredient', 'amount' => 1],
+                ['name' => 'some-other-ingredient', 'amount' => 4],
+            ], ], $merge);
     }
 }

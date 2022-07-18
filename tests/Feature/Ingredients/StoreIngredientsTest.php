@@ -40,6 +40,13 @@ class StoreIngredientsTest extends TestCase
         $response = $this->postJson(route('ingredient.store'), $data);
 
         $response->assertJsonValidationErrors('name');
+        $response->assertJsonFragment([
+            'errors' => [
+                'name' => [
+                    'The name has already been taken.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -74,6 +81,13 @@ class StoreIngredientsTest extends TestCase
         $response = $this->postJson(route('ingredient.store'), $data);
 
         $response->assertJsonValidationErrors('name');
+        $response->assertJsonFragment([
+            'errors' => [
+                'name' => [
+                    'The name must be a string.',
+                ],
+            ],
+        ]);
     }
 
     protected function getIngredientData($merge = []): array

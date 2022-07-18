@@ -35,6 +35,8 @@ class UpdateRecipeRequest extends FormRequest
             'category_id' => [
                 Rule::exists('categories', 'id')->where(fn ($query) => $query->where('user_id', Auth::user()->id)),
             ],
+            'images' => 'nullable|array',
+            'images.*' => 'image',
         ];
     }
 }
