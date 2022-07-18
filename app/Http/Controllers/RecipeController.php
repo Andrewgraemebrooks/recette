@@ -35,12 +35,8 @@ class RecipeController extends Controller
         $user = auth()->user();
         $recipe = new Recipe();
         $recipe->name = $request->name;
-        if ($request->rating || $request->rating === 0) {
-            $recipe->rating = $request->rating;
-        }
-        if ($request->category_id) {
-            $recipe->category_id = $request->category_id;
-        }
+        $recipe->rating = $request->rating;
+        $recipe->category_id = $request->category_id;
         $recipe->user_id = $user->id;
         $recipe->save();
         foreach ($request->ingredients as $ingredient) {
@@ -94,39 +90,29 @@ class RecipeController extends Controller
         if ($recipe->user->id !== $user->id) {
             abort(404, 'Cannot find recipe');
         }
-        if ($request->name) {
-            $recipe->name = $request->name;
-        }
-        if ($request->ingredients) {
-            $recipe->ingredients()->detach();
-            foreach ($request->ingredients as $ingredient) {
-                $name = $ingredient['name'];
-                $amount = $ingredient['amount'];
-                if (Ingredient::where(['name' => $name, 'user_id' => $user->id])->exists()) {
-                    $existingIngredient = Ingredient::firstWhere(['name' => $name, 'user_id' => $user->id]);
-                    $recipe->ingredients()->attach($existingIngredient->id, ['amount' => $amount]);
-                    continue;
-                }
-                $newIngredient = new Ingredient();
-                $newIngredient->name = $name;
-                $newIngredient->user_id = $user->id;
-                $recipe->ingredients()->save($newIngredient, ['amount' => $amount]);
+        $recipe->name = $request->name;
+        $recipe->rating = $request->rating;
+        $recipe->category_id = $request->category_id;
+        $recipe->ingredients()->detach();
+        foreach ($request->ingredients as $ingredient) {
+            $name = $ingredient['name'];
+            $amount = $ingredient['amount'];
+            if (Ingredient::where(['name' => $name, 'user_id' => $user->id])->exists()) {
+                $existingIngredient = Ingredient::firstWhere(['name' => $name, 'user_id' => $user->id]);
+                $recipe->ingredients()->attach($existingIngredient->id, ['amount' => $amount]);
+                continue;
             }
+            $newIngredient = new Ingredient();
+            $newIngredient->name = $name;
+            $newIngredient->user_id = $user->id;
+            $recipe->ingredients()->save($newIngredient, ['amount' => $amount]);
         }
         if ($request->images) {
             foreach ($request->images as $image) {
                 Storage::put($image->name, $image);
             }
         }
-        if ($request->rating) {
-            $recipe->rating = $request->rating;
-        }
-        if ($request->category_id) {
-            $recipe->category_id = $request->category_id;
-        }
-        if ($recipe->isDirty()) {
-            $recipe->save();
-        }
+        $recipe->save();
 
         return new RecipeResource($recipe);
     }

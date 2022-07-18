@@ -68,12 +68,8 @@ class IngredientController extends Controller
         if ($ingredient->user->id !== $user->id) {
             abort(404, 'Cannot find ingredient');
         }
-        if ($request->name) {
-            $ingredient->name = $request->name;
-        }
-        if ($ingredient->isDirty()) {
-            $ingredient->save();
-        }
+        $ingredient->name = $request->name;
+        $ingredient->save();
 
         return new IngredientResource($ingredient);
     }

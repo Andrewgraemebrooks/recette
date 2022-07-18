@@ -79,6 +79,13 @@ class StoreRecipeTest extends TestCase
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertJsonValidationErrors('name');
+        $response->assertJsonFragment([
+            'errors' => [
+                'name' => [
+                    'The name field is required.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -89,6 +96,13 @@ class StoreRecipeTest extends TestCase
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertJsonValidationErrors('ingredients');
+        $response->assertJsonFragment([
+            'errors' => [
+                'ingredients' => [
+                    'The ingredients field is required.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -103,6 +117,13 @@ class StoreRecipeTest extends TestCase
 
         $response = $this->postJson(route('recipe.store'), $data);
         $response->assertJsonValidationErrors('name');
+        $response->assertJsonFragment([
+            'errors' => [
+                'name' => [
+                    'The name has already been taken.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -137,6 +158,13 @@ class StoreRecipeTest extends TestCase
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertJsonValidationErrors('ingredients');
+        $response->assertJsonFragment([
+            'errors' => [
+                'ingredients' => [
+                    'The ingredients must be an array.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -212,6 +240,13 @@ class StoreRecipeTest extends TestCase
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertJsonValidationErrors('name');
+        $response->assertJsonFragment([
+            'errors' => [
+                'name' => [
+                    'The name must be a string.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -237,6 +272,23 @@ class StoreRecipeTest extends TestCase
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertCreated();
+    }
+
+    /** @test */
+    public function if_images_are_not_null_they_must_be_an_array()
+    {
+        $data = $this->getRecipeData(['images' => 9999999]);
+
+        $response = $this->postJson(route('recipe.store'), $data);
+
+        $response->assertJsonValidationErrors('images');
+        $response->assertJsonFragment([
+            'errors' => [
+                'images' => [
+                    'The images must be an array.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -277,12 +329,19 @@ class StoreRecipeTest extends TestCase
     public function a_recipe_rating_must_be_a_valid_number()
     {
         $data = $this->getRecipeData([
-            'rating' => 'not-a-number',
+            'rating' => false,
         ]);
 
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertJsonValidationErrors('rating');
+        $response->assertJsonFragment([
+            'errors' => [
+                'rating' => [
+                    'The rating must be an integer.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -295,6 +354,13 @@ class StoreRecipeTest extends TestCase
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertJsonValidationErrors('rating');
+        $response->assertJsonFragment([
+            'errors' => [
+                'rating' => [
+                    'The rating must be between 0 and 5.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
@@ -307,6 +373,13 @@ class StoreRecipeTest extends TestCase
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertJsonValidationErrors('rating');
+        $response->assertJsonFragment([
+            'errors' => [
+                'rating' => [
+                    'The rating must be between 0 and 5.',
+                ],
+            ],
+        ]);
     }
 
     /** @test */
