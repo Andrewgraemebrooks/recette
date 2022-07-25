@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\GroceryController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\RecipeController;
 use Illuminate\Http\Request;
@@ -41,4 +42,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/ingredient/{ingredient}', [IngredientController::class, 'show'])->name('ingredient.show');
     Route::put('/ingredient/{ingredient}', [IngredientController::class, 'update'])->name('ingredient.update');
     Route::delete('/ingredient/{ingredient}', [IngredientController::class, 'destroy'])->name('ingredient.destroy');
+
+    // Grocery
+    Route::post('/grocery', [GroceryController::class, 'store'])->name('grocery.store');
 });
