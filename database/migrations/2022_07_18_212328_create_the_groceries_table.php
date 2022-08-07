@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('groceries', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->uuid('user_id')->constrained('users');
             $table->string('name');
             $table->integer('amount');
             $table->timestamps();
