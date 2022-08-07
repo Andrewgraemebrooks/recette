@@ -18,6 +18,7 @@ class GroceryController extends Controller
     {
         $user = auth()->user();
         $groceries = Grocery::where('user_id', $user->id)->get();
+
         return GroceryResource::collection($groceries);
     }
 

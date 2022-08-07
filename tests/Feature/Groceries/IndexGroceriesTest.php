@@ -16,7 +16,7 @@ class IndexGroceriesTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
         $groceries = Grocery::factory(3)->create([
-            'user_id' => $user->id
+            'user_id' => $user->id,
         ]);
 
         $response = $this->getJson(route('grocery.index'));
@@ -24,7 +24,7 @@ class IndexGroceriesTest extends TestCase
         $response->assertOk();
         $groceries->each(fn ($grocery) => (
             $response->assertJsonFragment([
-                'id' => $grocery->id
+                'id' => $grocery->id,
             ])
         ));
     }
@@ -36,7 +36,7 @@ class IndexGroceriesTest extends TestCase
         Sanctum::actingAs($user, ['*']);
         $otherUser = User::factory()->create();
         $groceries = Grocery::factory(3)->create([
-            'user_id' => $otherUser->id
+            'user_id' => $otherUser->id,
         ]);
 
         $response = $this->getJson(route('grocery.index'));
@@ -44,9 +44,8 @@ class IndexGroceriesTest extends TestCase
         $response->assertOk();
         $groceries->each(fn ($grocery) => (
             $response->assertJsonMissing([
-                'id' => $grocery->id
+                'id' => $grocery->id,
             ])
         ));
     }
-
 }
