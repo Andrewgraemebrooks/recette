@@ -3,6 +3,9 @@
 use App\Models\Ingredient;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -129,5 +132,28 @@ class UpdateIngredientTest extends TestCase
         $this->assertDatabaseMissing('ingredients', [
             'name' => 'some-new-name',
         ]);
+    }
+
+    /** @test */
+    public function an_ingredient_can_have_images_attached_to_it()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+        $ingredient = Ingredient::factory()->create([
+            'user_id' => $user->id,
+        ]);
+        $imageOne = Str::random(10).'.jpg';
+        $imageTwo = Str::random(10).'.jpg';
+        $data = [
+            'name' => 'some-name',
+            'images' => [
+                UploadedFile::fake()->image($imageOne),
+                UploadedFile::fake()->image($imageTwo),
+            ],
+        ];
+
+        $response = $this->putJson(route('ingredient.update', $ingredient), $data);
+        $response->assertOk();
+        Storage::disk('local')->assertExists([$imageOne, $imageTwo]);
     }
 }

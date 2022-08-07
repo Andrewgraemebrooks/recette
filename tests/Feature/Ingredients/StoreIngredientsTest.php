@@ -3,6 +3,9 @@
 use App\Models\Ingredient;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -88,6 +91,25 @@ class StoreIngredientsTest extends TestCase
                 ],
             ],
         ]);
+    }
+
+    /** @test */
+    public function an_ingredient_can_have_images_attached_to_it()
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+        $imageOne = Str::random(10).'.jpg';
+        $imageTwo = Str::random(10).'.jpg';
+        $data = $this->getIngredientData([
+            'images' => [
+                UploadedFile::fake()->image($imageOne),
+                UploadedFile::fake()->image($imageTwo),
+            ],
+        ]);
+
+        $response = $this->postJson(route('ingredient.store'), $data);
+        $response->assertCreated();
+        Storage::disk('local')->assertExists([$imageOne, $imageTwo]);
     }
 
     protected function getIngredientData($merge = []): array
