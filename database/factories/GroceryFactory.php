@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +19,8 @@ class GroceryFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
-            'amount' => $this->faker->numberBetween(0, 15)
+            'amount' => $this->faker->numberBetween(0, 15),
+            'user_id' => User::factory()->create()->id,
         ];
     }
 }

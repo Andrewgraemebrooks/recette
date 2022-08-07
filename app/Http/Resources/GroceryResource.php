@@ -17,7 +17,7 @@ class GroceryResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'amount' => $this->amount
+            'amount' => $this->amount,
         ];
     }
 }

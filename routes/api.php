@@ -45,4 +45,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Grocery
     Route::post('/grocery', [GroceryController::class, 'store'])->name('grocery.store');
+    Route::put('/grocery/{grocery}', [GroceryController::class, 'update'])->name('grocery.update');
 });

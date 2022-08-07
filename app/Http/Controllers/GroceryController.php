@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreGroceryRequest;
+use App\Http\Requests\UpdateGroceryRequest;
 use App\Http\Resources\GroceryResource;
 use App\Models\Grocery;
-use Illuminate\Http\Request;
 
 class GroceryController extends Controller
 {
@@ -32,6 +32,7 @@ class GroceryController extends Controller
         $grocery->amount = $request->amount;
         $grocery->user_id = auth()->user()->id;
         $grocery->save();
+
         return new GroceryResource($grocery);
     }
 
@@ -53,9 +54,17 @@ class GroceryController extends Controller
      * @param  \App\Models\Grocery  $grocery
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Grocery $grocery)
+    public function update(UpdateGroceryRequest $request, Grocery $grocery)
     {
-        //
+        $user = auth()->user();
+        if ($grocery->user_id !== $user->id) {
+            abort(404);
+        }
+        $grocery->name = $request->name;
+        $grocery->amount = $request->amount;
+        $grocery->save();
+
+        return new GroceryResource($grocery);
     }
 
     /**

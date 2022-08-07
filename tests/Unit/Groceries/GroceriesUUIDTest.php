@@ -15,5 +15,4 @@ class GroceriesUUIDTest extends TestCase
         $grocery = Grocery::factory()->create();
         $this->assertTrue(Str::isUuid($grocery->id));
     }
-
 }

@@ -21,7 +21,7 @@ class IndexRecipeTest extends TestCase
         ]);
         $recipes = Recipe::factory()
             ->count(2)
-            ->hasAttached($ingredient, ['amount'=> 3])
+            ->hasAttached($ingredient, ['amount' => 3])
             ->create([
                 'user_id' => $user->id,
             ]);
@@ -58,7 +58,7 @@ class IndexRecipeTest extends TestCase
         ]);
         $recipes = Recipe::factory()
             ->count(2)
-            ->hasAttached($ingredient, ['amount'=> 3])
+            ->hasAttached($ingredient, ['amount' => 3])
             ->create([
                 'user_id' => $someOtherUser->id,
             ]);

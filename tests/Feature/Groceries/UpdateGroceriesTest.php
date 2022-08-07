@@ -1,24 +1,28 @@
 <?php
 
+use App\Models\Grocery;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
-class StoreGroceriesTest extends TestCase
+class UpdateGroceriesTest extends TestCase
 {
     use RefreshDatabase;
 
     /** @test */
-    public function a_user_can_create_a_grocery()
+    public function a_user_can_update_a_grocery()
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
+        $grocery = Grocery::factory()->create([
+            'user_id' => $user->id,
+        ]);
         $data = $this->getGroceryData();
 
-        $response = $this->postJson(route('grocery.store'), $data);
+        $response = $this->putJson(route('grocery.update', $grocery), $data);
 
-        $response->assertCreated();
+        $response->assertOk();
         $this->assertDatabaseHas('groceries', [
             'name' => $data['name'],
             'amount' => $data['amount'],
@@ -26,15 +30,18 @@ class StoreGroceriesTest extends TestCase
     }
 
     /** @test */
-    public function creating_a_grocery_requires_a_name()
+    public function updating_a_grocery_requires_a_name()
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
+        $grocery = Grocery::factory()->create([
+            'user_id' => $user->id,
+        ]);
         $data = $this->getGroceryData([
             'name' => null,
         ]);
 
-        $response = $this->postJson(route('grocery.store'), $data);
+        $response = $this->putJson(route('grocery.update', $grocery), $data);
 
         $response->assertJsonValidationErrors('name');
         $response->assertJsonFragment([
@@ -47,15 +54,18 @@ class StoreGroceriesTest extends TestCase
     }
 
     /** @test */
-    public function creating_a_grocery_requires_an_amount()
+    public function updating_a_grocery_requires_an_amount()
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
+        $grocery = Grocery::factory()->create([
+            'user_id' => $user->id,
+        ]);
         $data = $this->getGroceryData([
             'amount' => null,
         ]);
 
-        $response = $this->postJson(route('grocery.store'), $data);
+        $response = $this->putJson(route('grocery.update', $grocery), $data);
 
         $response->assertJsonValidationErrors('amount');
         $response->assertJsonFragment([
@@ -72,11 +82,14 @@ class StoreGroceriesTest extends TestCase
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
+        $grocery = Grocery::factory()->create([
+            'user_id' => $user->id,
+        ]);
         $data = $this->getGroceryData([
             'name' => true,
         ]);
 
-        $response = $this->postJson(route('grocery.store'), $data);
+        $response = $this->putJson(route('grocery.update', $grocery), $data);
 
         $response->assertJsonValidationErrors('name');
         $response->assertJsonFragment([
@@ -93,11 +106,14 @@ class StoreGroceriesTest extends TestCase
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
+        $grocery = Grocery::factory()->create([
+            'user_id' => $user->id,
+        ]);
         $data = $this->getGroceryData([
             'amount' => 'not-an-integer',
         ]);
 
-        $response = $this->postJson(route('grocery.store'), $data);
+        $response = $this->putJson(route('grocery.update', $grocery), $data);
 
         $response->assertJsonValidationErrors('amount');
         $response->assertJsonFragment([
@@ -110,25 +126,29 @@ class StoreGroceriesTest extends TestCase
     }
 
     /** @test */
-    public function the_grocery_belongs_to_the_user_creating_the_grocery()
+    public function the_grocery_must_belong_to_the_user_updating_the_grocery()
     {
         $user = User::factory()->create();
         Sanctum::actingAs($user, ['*']);
+        $otherUser = User::factory()->create();
+        $grocery = Grocery::factory()->create([
+            'user_id' => $otherUser->id,
+        ]);
         $data = $this->getGroceryData();
 
-        $response = $this->postJson(route('grocery.store'), $data);
-        $response->assertCreated();
+        $response = $this->putJson(route('grocery.update', $grocery), $data);
+        $response->assertNotFound();
 
-        $this->assertDatabaseHas('groceries', [
+        $this->assertDatabaseMissing('groceries', [
             'name' => $data['name'],
-            'user_id' => $user->id,
+            'amount' => $data['amount'],
         ]);
     }
 
     protected function getGroceryData($merge = []): array
     {
         return array_merge([
-            'name' => 'some-grocery',
+            'name' => 'some-new-grocery-name',
             'amount' => rand(0, 15),
         ], $merge);
     }
