@@ -22,7 +22,7 @@ class ShowRecipeTest extends TestCase
         $recipe = Recipe::factory()
             ->hasAttached(
                 $ingredient,
-                ['amount'=> 1]
+                ['amount' => 1]
             )->create([
                 'user_id' => $user->id,
             ]);
@@ -53,7 +53,7 @@ class ShowRecipeTest extends TestCase
         $recipe = Recipe::factory()
             ->hasAttached(
                 $ingredient,
-                ['amount'=> 1]
+                ['amount' => 1]
             )->create([
                 'user_id' => $someOtherUser->id,
             ]);
