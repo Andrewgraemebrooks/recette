@@ -6,6 +6,7 @@ use App\Http\Requests\StoreIngredientRequest;
 use App\Http\Requests\UpdateIngredientRequest;
 use App\Http\Resources\IngredientResource;
 use App\Models\Ingredient;
+use Illuminate\Support\Facades\Storage;
 
 class IngredientController extends Controller
 {
@@ -34,6 +35,11 @@ class IngredientController extends Controller
         $ingredient = new Ingredient();
         $ingredient->name = $request->name;
         $ingredient->user_id = $user->id;
+        if ($request->images) {
+            foreach ($request->images as $image) {
+                Storage::put($image->name, $image);
+            }
+        }
         $ingredient->save();
 
         return new IngredientResource($ingredient);
@@ -69,6 +75,11 @@ class IngredientController extends Controller
             abort(404, 'Cannot find ingredient');
         }
         $ingredient->name = $request->name;
+        if ($request->images) {
+            foreach ($request->images as $image) {
+                Storage::put($image->name, $image);
+            }
+        }
         $ingredient->save();
 
         return new IngredientResource($ingredient);

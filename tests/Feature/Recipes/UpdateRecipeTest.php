@@ -247,15 +247,18 @@ class UpdateRecipeTest extends TestCase
     public function an_array_of_images_can_be_used_with_a_recipe_update()
     {
         Storage::fake('local');
+
+        $imageOne = Str::random(10).'.jpg';
+        $imageTwo = Str::random(10).'.jpg';
         $data = $this->getRecipeData(['images' => [
-            UploadedFile::fake()->image('imageOne.jpg'),
-            UploadedFile::fake()->image('imageTwo.jpg'),
+            UploadedFile::fake()->image($imageOne),
+            UploadedFile::fake()->image($imageTwo),
         ]]);
 
         $response = $this->putJson(route('recipe.update', $this->recipe), $data);
 
         $response->assertOk();
-        Storage::disk('local')->assertExists(['imageOne.jpg', 'imageTwo.jpg']);
+        Storage::disk('local')->assertExists([$imageOne, $imageTwo]);
     }
 
     /** @test */

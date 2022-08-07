@@ -253,15 +253,17 @@ class StoreRecipeTest extends TestCase
     public function an_array_of_images_can_be_stored_with_a_recipe()
     {
         Storage::fake('local');
+        $imageOne = Str::random(10).'.jpg';
+        $imageTwo = Str::random(10).'.jpg';
         $data = $this->getRecipeData(['images' => [
-            UploadedFile::fake()->image('imageOne.jpg'),
-            UploadedFile::fake()->image('imageTwo.jpg'),
+            UploadedFile::fake()->image($imageOne),
+            UploadedFile::fake()->image($imageTwo),
         ]]);
 
         $response = $this->postJson(route('recipe.store'), $data);
 
         $response->assertCreated();
-        Storage::disk('local')->assertExists(['imageOne.jpg', 'imageTwo.jpg']);
+        Storage::disk('local')->assertExists([$imageOne, $imageTwo]);
     }
 
     /** @test */
