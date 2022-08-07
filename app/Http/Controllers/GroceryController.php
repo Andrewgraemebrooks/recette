@@ -47,7 +47,12 @@ class GroceryController extends Controller
      */
     public function show(Grocery $grocery)
     {
-        //
+        $user = auth()->user();
+        if ($grocery->user_id !== $user->id) {
+            abort(404);
+        }
+
+        return new GroceryResource($grocery);
     }
 
     /**

@@ -48,4 +48,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/grocery/{grocery}', [GroceryController::class, 'update'])->name('grocery.update');
     Route::get('/grocery', [GroceryController::class, 'index'])->name('grocery.index');
     Route::delete('/grocery/{grocery}', [GroceryController::class, 'destroy'])->name('grocery.destroy');
+    Route::get('/grocery/{grocery}', [GroceryController::class, 'show'])->name('grocery.show');
 });
