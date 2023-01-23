@@ -4,6 +4,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GroceryController;
 use App\Http\Controllers\IngredientController;
 use App\Http\Controllers\RecipeController;
+use App\Http\Controllers\TagController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -49,4 +50,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/grocery', [GroceryController::class, 'index'])->name('grocery.index');
     Route::delete('/grocery/{grocery}', [GroceryController::class, 'destroy'])->name('grocery.destroy');
     Route::get('/grocery/{grocery}', [GroceryController::class, 'show'])->name('grocery.show');
+
+    // Tags
+    Route::post('/tags', [TagController::class, 'store'])->name('tag.store');
 });
