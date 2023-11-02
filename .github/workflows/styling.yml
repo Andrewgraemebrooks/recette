@@ -1,0 +1,32 @@
+name: Quality Gates
+
+on: [pull_request]
+
+jobs:
+  Check-PSR2:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: imagick
+    - name: Write GitHub token to composer config
+      run: |
+        composer config --global github-oauth.github.com ${{ secrets.COMPOSER_TOKEN }}
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      run: |
+        echo "::set-output name=dir::$(composer config cache-files-dir)"
+    - uses: actions/cache@v1
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-composer-
+    - name: Install Dependencies
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+    - name: Run Laravel Pint
+      run: vendor/bin/pint --test
