@@ -3,30 +3,17 @@ name: Quality Gates
 on: [pull_request]
 
 jobs:
-  Check-PSR2:
+  Check-Laravel-Pint:
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
+    steps:
+    - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
       with:
-        php-version: '8.2'
-        extensions: imagick
-    - name: Write GitHub token to composer config
-      run: |
-        composer config --global github-oauth.github.com ${{ secrets.COMPOSER_TOKEN }}
-    - name: Get Composer Cache Directory
-      id: composer-cache
-      run: |
-        echo "::set-output name=dir::$(composer config cache-files-dir)"
-    - uses: actions/cache@v1
-      with:
-        path: ${{ steps.composer-cache.outputs.dir }}
-        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-composer-
+        php-version: '8.1'
+    - uses: actions/checkout@v3
+    - name: Copy .env
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
     - name: Install Dependencies
-      run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
     - name: Run Laravel Pint
       run: vendor/bin/pint --test
