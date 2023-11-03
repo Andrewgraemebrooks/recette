@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\MobileLoginUserController;
 use App\Http\Controllers\Auth\MobileRegisterUserController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\GroceryController;
@@ -19,7 +20,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// Mobile Auth
 Route::post('/mobile/register', [MobileRegisterUserController::class, 'store'])->name('mobile.register');
+Route::post('/mobile/login', [MobileLoginUserController::class, 'store'])->name('mobile.login');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     // Auth
