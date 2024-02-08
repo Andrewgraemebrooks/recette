@@ -14,6 +14,7 @@ class RecipeIngredientResource extends JsonResource
      */
     public function toArray($request)
     {
+        $this->load('recipes');
         $amount = null;
         foreach ($this->recipes as $recipe) {
             if ($recipe->pivot->ingredient_id === $this->id) {
